@@ -1,0 +1,772 @@
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using BepInEx;
+using BepInEx.Configuration;
+using BepInEx.Logging;
+using HarmonyLib;
+using NuclearOption.Networking;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace WSOYappinator
+{
+    [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
+    public class VoicelineMod : BaseUnityPlugin
+    {
+        public static VoicelineMod Instance { get; private set; }
+        public AudioSource AudioSource { get; private set; }
+        internal static new ManualLogSource Logger;
+
+        public ConfigEntry<bool> _modEnabled;
+        public ConfigEntry<float> _minDamage;
+        public Aircraft _currentAircraft;
+        public readonly Dictionary<string, int> _eventPriorities = new(StringComparer.OrdinalIgnoreCase);
+        private ConfigEntry<bool> _enableLogging;
+        private ConfigEntry<string> _selectedSet;
+        private ConfigEntry<float> _cooldownSeconds;
+        private ConfigEntry<int> _baseProbability;
+        private ConfigEntry<int> _volume;
+        private float _lastPlayedTime = -Mathf.Infinity;
+        private string _audioSetFolder;
+        private int _currentPriority;
+        private float _priorityResetTime = 0f;
+        private readonly List<AudioClip> _globalClips = [];
+        private readonly HashSet<AudioClip> _availableClips = [];
+        private static readonly HashSet<string> _missileFallbackKeys = new(StringComparer.OrdinalIgnoreCase) { "nuclear", "bomb", "fox2", "fox3", "rocket" };
+        private static readonly HashSet<string> _rwrFallbackKeys = new(StringComparer.OrdinalIgnoreCase) { "rwrsarh", "rwrarh", "rwrir", "rwroptical" };
+        private readonly Dictionary<string, List<AudioClip>> _voicelineClips = new(StringComparer.OrdinalIgnoreCase);
+        private Harmony _harmony;
+        private MissileWarning _missileWarningComponent;
+
+        internal class ConfigurationManagerAttributes
+        {
+            public bool? Browsable;
+            public bool? IsAdvanced;
+        }
+
+        private void Awake()
+        {
+            Instance = this;
+            Logger = base.Logger;
+            this.hideFlags = HideFlags.HideAndDontSave;
+
+            _modEnabled = Config.Bind(
+                "General", "Enable Mod", true,
+                "Enable or disable the Voiceline Mod"
+            );
+            _enableLogging = Config.Bind(
+                "General", "Enable Logging", true,
+                new ConfigDescription(
+                    "Whether to emit debug/info logs",
+                    null,
+                    new ConfigurationManagerAttributes { IsAdvanced = true }
+                )
+            );
+
+            var baseAudio = Path.Combine(Paths.PluginPath, "WSOYappinator", "audio");
+            Directory.CreateDirectory(baseAudio);
+
+            var sets = Directory.GetDirectories(baseAudio)
+                        .Select(Path.GetFileName)
+                        .Where(n => !string.IsNullOrWhiteSpace(n))
+                        .ToArray();
+            var defaultSet = sets.Length > 0 ? sets[0] : "";
+
+            _selectedSet = Config.Bind(
+                "General", "Voiceline Set", defaultSet,
+                new ConfigDescription(
+                    "Which voiceline folder to use",
+                    new AcceptableValueList<string>(sets)
+                )
+            );
+            _cooldownSeconds = Config.Bind(
+                "General", "Minimum Cooldown (s)", 4f,
+                new ConfigDescription("", null, new ConfigurationManagerAttributes { IsAdvanced = true })
+            );
+            _baseProbability = Config.Bind(
+                "General", "Voiceline Chance Base Multiplier%", 100,
+                new ConfigDescription(
+                    "voiceline chance base multiplier%",
+                    new AcceptableValueRange<int>(0, 100),
+                    new ConfigurationManagerAttributes { IsAdvanced = true }
+                )
+            );
+            _minDamage = Config.Bind(
+                "General", "Minimum Damage to Play Voiceline", 15000f,
+                new ConfigDescription("", null, new ConfigurationManagerAttributes { IsAdvanced = true })
+            );
+            _volume = Config.Bind(
+                "General", "Voiceline Volume", 100,
+                new ConfigDescription(
+                    "Global playback volume for voicelines",
+                    new AcceptableValueRange<int>(0, 100)
+                )
+            );
+
+            _modEnabled.SettingChanged += OnModEnabledChanged;
+
+            _enableLogging.SettingChanged += (s, e) =>
+            {
+                if (_enableLogging.Value)
+                    Logger.LogInfo("Logging enabled.");
+            };
+
+            _volume.SettingChanged += (s, e) =>
+            {
+                if (AudioSource != null)
+                    AudioSource.volume = _volume.Value / 100f;
+            };
+
+            _selectedSet.SettingChanged += (s, e) =>
+            {
+                Logger.LogInfo($"Voiceline Set changed → '{_selectedSet.Value}'");
+                InitializeSet();
+            };
+
+            AudioSource = gameObject.AddComponent<AudioSource>();
+            AudioSource.playOnAwake = false;
+            AudioSource.volume = _volume.Value / 100f;
+
+            _harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
+
+            InitializeSet();
+
+            if (_modEnabled.Value)
+            {
+                _harmony.PatchAll();
+                Logger.LogInfo("Harmony patches applied.");
+            }
+            else
+            {
+                Logger.LogInfo("Mod disabled on startup; patches not applied.");
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (_modEnabled.Value && _harmony != null)
+                _harmony.UnpatchSelf();
+        }
+        private void OnModEnabledChanged(object sender, EventArgs e)
+        {
+            if (_modEnabled.Value)
+            {
+                if (_enableLogging.Value)
+                    Logger.LogInfo("Mod enabled; applying Harmony patches.");
+                _harmony.PatchAll();
+            }
+            else
+            {
+                if (_enableLogging.Value)
+                    Logger.LogInfo("Mod disabled; removing Harmony patches.");
+                if (AudioSource != null && AudioSource.isPlaying)
+                    AudioSource.Stop();
+                _harmony.UnpatchSelf();
+            }
+        }
+        private void InitializeSet()
+        {
+            _audioSetFolder = Path.Combine(Paths.PluginPath, "WSOYappinator", "audio", _selectedSet.Value);
+            Logger.LogInfo($"Initializing set folder: {_audioSetFolder}");
+
+            EnsureDefaultEventPriorityFile();
+            LoadEventPriorities();
+
+            _voicelineClips.Clear();
+            _globalClips.Clear();
+            _availableClips.Clear();
+
+            LoadAllWavsIntoMemory(_audioSetFolder);
+
+            foreach (var c in _globalClips)
+                _availableClips.Add(c);
+
+            if (_enableLogging.Value)
+            {
+                foreach (var kv in _voicelineClips)
+                    Logger.LogInfo($"Registered event '{kv.Key}' → {kv.Value.Count} clip(s)");
+            }
+        }
+
+        private void EnsureDefaultEventPriorityFile()
+        {
+            var priPath = Path.Combine(_audioSetFolder, "eventPriorities.txt");
+            if (File.Exists(priPath)) return;
+
+            var defaultPriorities = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["death"] = 5,
+                ["damage"] = 4,
+                ["eject"] = 4,
+                ["spawn"] = 3,
+
+                ["rwr"] = 3,  //fallback for other rwr
+                ["rwrsarh"] = 3,
+                ["rwrarh"] = 3,
+                ["rwrir"] = 3,
+                ["rwroptical"] = 3,
+
+                ["rare"] = 2,       //rare generic event for flavor
+                ["kill"] = 2,
+                ["hit"] = 2,
+
+                ["missile"] = 2, //fallback for other missiles/bombs
+                ["nuclear"] = 2,
+                ["bomb"] = 2,
+                ["fox2"] = 2,
+                ["fox3"] = 2,
+                ["rocket"] = 2,
+                ["guns"] = 2,
+                ["shake"] = 2,
+
+                ["rwroff"] = 1, // when rwr stops
+                ["sortie"] = 1, // successful sortie
+                ["downtime"] = 1, //or "generic"? not yet implemented
+                ["geardown"] = 1,
+                ["gearup"] = 1,
+                ["stabilityon"] = 1,
+                ["stabilityoff"] = 1,
+                ["radaron"] = 1,
+                ["radaroff"] = 1,
+                ["hoveron"] = 1,
+                ["turreton"] = 1,
+                ["turretoff"] = 1,
+                ["hoveroff"] = 1,
+                ["newradarping"] = 1,
+                ["touchdown"] = 1
+            };
+
+            using (var writer = new StreamWriter(priPath, false, Encoding.UTF8))
+            {
+                foreach (var kv in defaultPriorities)
+                    writer.WriteLine($"{kv.Key}={kv.Value}");
+            }
+
+            Logger.LogInfo($"Created default priorities file at {priPath}");
+        }
+
+        private void LoadEventPriorities()
+        {
+            _eventPriorities.Clear();
+            var priPath = Path.Combine(_audioSetFolder, "eventPriorities.txt");
+            if (!File.Exists(priPath))
+            {
+                Logger.LogWarning($"No priorities file in {_audioSetFolder}");
+                return;
+            }
+
+            foreach (var line in File.ReadAllLines(priPath))
+            {
+                var trimmed = line.Trim();
+                if (string.IsNullOrEmpty(trimmed) || trimmed.StartsWith("#"))
+                    continue;
+
+                var parts = trimmed.Split('=', 2);
+                if (parts.Length != 2)
+                    continue;
+
+                var key = parts[0].Trim().ToLowerInvariant();
+                if (int.TryParse(parts[1].Trim(), out var val))
+                    _eventPriorities[key] = val;
+                else
+                    Logger.LogWarning($"Bad priority for '{key}': {parts[1]}");
+            }
+
+            Logger.LogInfo($"Loaded {_eventPriorities.Count} priorities from {priPath}");
+        }
+
+        private void LoadAllWavsIntoMemory(string folder)
+        {
+            var splitPattern = new[] { ' ', '_', '-', '+', '(', ')', ',' };
+
+            foreach (var path in Directory.GetFiles(folder, "*.wav"))
+            {
+                var clip = LoadWav(path);
+                if (clip == null)
+                {
+                    Logger.LogWarning($"Skipping invalid WAV: {path}");
+                    continue;
+                }
+
+                _globalClips.Add(clip);
+
+                string nameSansExt = Path.GetFileNameWithoutExtension(path);
+                var rawTokens = nameSansExt
+                    .Split(splitPattern, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(t => t.Trim().ToLowerInvariant())
+                    .ToArray();
+
+                bool matchedAtLeastOne = false;
+                foreach (var token in rawTokens)
+                {
+                    //if (token == "jump") token = "rare";
+                    if (_eventPriorities.ContainsKey(token))
+                    {
+                        matchedAtLeastOne = true;
+                        if (!_voicelineClips.TryGetValue(token, out var list))
+                            list = _voicelineClips[token] = new List<AudioClip>();
+                        list.Add(clip);
+                    }
+                }
+
+                if (!matchedAtLeastOne && _enableLogging.Value)
+                {
+                    Logger.LogWarning($"WAV '{nameSansExt}' did not match any event-key.");
+                }
+            }
+        }
+
+        private AudioClip LoadWav(string path)
+        {
+            var data = File.ReadAllBytes(path);
+            if (data.Length < 44)
+                return null;
+
+            // --- RIFF header parsing ---
+            int channels = BitConverter.ToInt16(data, 22);
+            int sampleRate = BitConverter.ToInt32(data, 24);
+            int bitsPerSample = BitConverter.ToInt16(data, 34);
+
+            // Only support 16-bit or 8-bit PCM
+            if (bitsPerSample != 16 && bitsPerSample != 8)
+                return null;
+
+            int headerSize = 44;
+            if (bitsPerSample == 16)
+            {
+                // Each sample = 2 bytes (Int16)
+                int sampleCount = (data.Length - headerSize) / 2;
+                var floatArray = new float[sampleCount];
+
+                for (int i = 0; i < sampleCount; i++)
+                {
+                    short s = BitConverter.ToInt16(data, headerSize + i * 2);
+                    floatArray[i] = s / 32768f;
+                }
+
+                // clip length = (total samples) / channels
+                int frames = sampleCount / channels;
+                var clip = AudioClip.Create(
+                    Path.GetFileNameWithoutExtension(path),
+                    frames,
+                    channels,
+                    sampleRate,
+                    false
+                );
+                clip.SetData(floatArray, 0);
+                return clip;
+            }
+            else // bitsPerSample == 8
+            {
+                // Each sample = 1 byte (unsigned). Range 0..255 → convert to –1..+1
+                int sampleCount = (data.Length - headerSize);
+                var floatArray = new float[sampleCount];
+
+                for (int i = 0; i < sampleCount; i++)
+                {
+                    // byte value in [0..255], zero‐offset → signed in [–128..+127]
+                    int unsignedByte = data[headerSize + i];
+                    int signed = unsignedByte - 128;        // now in –128..+127
+                    floatArray[i] = signed / 128f;          // now in –1.0 .. +0.9921875
+                }
+
+                int frames = sampleCount / channels;
+                var clip = AudioClip.Create(
+                    Path.GetFileNameWithoutExtension(path),
+                    frames,
+                    channels,
+                    sampleRate,
+                    false
+                );
+                clip.SetData(floatArray, 0);
+                return clip;
+            }
+        }
+
+        public void PlayEventIfExists(string eventKey)
+        {
+            if (_eventPriorities.TryGetValue(eventKey, out var prio))
+            {
+                TriggerVoiceline(eventKey, prio);
+                return;
+            }
+
+            if (_missileFallbackKeys.Contains(eventKey) && _eventPriorities.TryGetValue("missile", out var mPrio))
+            {
+                TriggerVoiceline("missile", mPrio);
+                return;
+            }
+
+            if (_rwrFallbackKeys.Contains(eventKey) && _eventPriorities.TryGetValue("rwr", out var rPrio))
+            {
+                TriggerVoiceline("rwr", rPrio);
+                return;
+            }
+
+            Logger.LogWarning($"No priority for '{eventKey}' or fallback available.");
+
+        }
+        public void TriggerVoiceline(string eventName, int priority = 0)
+        {
+            if (string.IsNullOrEmpty(eventName))
+            {
+                Logger.LogWarning("TriggerVoiceline received a null/empty eventName");
+                return;
+            }
+
+            if (AudioSource == null)
+            {
+                AudioSource = gameObject.AddComponent<AudioSource>();
+                AudioSource.playOnAwake = false;
+                Logger.LogWarning("TriggerVoiceline: audioSource was null; re-created it.");
+            }
+
+            float now = Time.time;
+
+            if (AudioSource.isPlaying)
+            {
+                if (priority > _currentPriority)
+                {
+                    AudioSource.Stop();
+                    _currentPriority = 0;
+                }
+                else
+                {
+                    if (_enableLogging.Value) Logger.LogWarning($"Cannot interrupt current prio({_currentPriority}) with new prio({priority}) for '{eventName}'.");
+                    return;
+                }
+            }
+            else
+            {
+                if (now < _lastPlayedTime + _cooldownSeconds.Value)
+                {
+                    if (_enableLogging.Value) Logger.LogInfo($"On cooldown ({now - _lastPlayedTime:F1}s elapsed, need {_cooldownSeconds.Value:F1}s). Skipping '{eventName}'.");
+                    return;
+                }
+            }
+
+            if (_currentAircraft?.Player?.Aircraft == null && _currentAircraft)
+            {
+                OnLocalPlayerAircraftChanged(null);
+                if (eventName != "sortie" && eventName != "eject")
+                {
+                    eventName = "death";
+                    Logger.LogInfo("Playing 'death' because no aircraft is present.");
+                }
+            }
+
+            int roll = UnityEngine.Random.Range(0, 100);
+            if (roll == 1 && priority < _eventPriorities.GetValueSafe("rare"))
+            {
+                eventName = "rare";
+            }
+            else
+            {
+                int threshold = priority * _baseProbability.Value;
+                if (roll > threshold)
+                {
+                    if (_enableLogging.Value)
+                        Logger.LogInfo($"Roll failed for '{eventName}' ({roll} > {threshold})");
+                    return;
+                }
+            }
+
+            if (!_voicelineClips.TryGetValue(eventName, out var allForEvent) || allForEvent.Count == 0)
+            {
+                if (_enableLogging.Value)
+                    Logger.LogWarning($"No clips registered for event '{eventName}'");
+                return;
+            }
+
+            var candidates = allForEvent.Where(c => _availableClips.Contains(c)).ToList();
+            if (candidates.Count == 0)
+            {
+                _availableClips.Clear();
+                foreach (var c in _globalClips)
+                    _availableClips.Add(c);
+                candidates = allForEvent.ToList();
+            }
+
+            int idx = UnityEngine.Random.Range(0, candidates.Count);
+            var clipToPlay = candidates[idx];
+            _availableClips.Remove(clipToPlay);
+
+            AudioSource.clip = clipToPlay;
+            AudioSource.volume = _volume.Value / 100f;
+            AudioSource.Play();
+
+            _lastPlayedTime = now;
+            _currentPriority = priority;
+
+            if (_enableLogging.Value)
+                Logger.LogInfo($"Played voiceline '{eventName}' (priority {priority}). Next allowed after {(_lastPlayedTime + _cooldownSeconds.Value) - now:F1}s.");
+
+            _priorityResetTime = Time.time + clipToPlay.length;
+        }
+        void Update()
+        {
+            if (_currentPriority > 0 && Time.time >= _priorityResetTime)
+                _currentPriority = 0;
+        }
+
+        public void OnLocalPlayerAircraftChanged(Aircraft newAircraft)
+        {
+            if (_currentAircraft != null)
+            {
+                _currentAircraft.onSpawnedInPosition -= HandleSpawned;
+                _currentAircraft.onEject -= HandleEject;
+                _currentAircraft.OnTouchdown -= HandleTouchdown;
+                _currentAircraft.onSortieSuccessful -= HandleSortie;
+                _currentAircraft.onSetGear -= HandleSetGear;
+                //_currentAircraft.onSetFlightAssist -= HandleFlightAssist;
+
+                if (_missileWarningComponent != null)
+                {
+                    _missileWarningComponent.onMissileWarning -= HandleOnMissileWarning;
+                    _missileWarningComponent.offMissileWarning -= HandleOffMissileWarning;
+                    _missileWarningComponent = null;
+                }
+            }
+
+            _currentAircraft = newAircraft;
+            if (_currentAircraft == null) return;
+            _currentAircraft.onSpawnedInPosition += HandleSpawned;
+            _currentAircraft.onEject += HandleEject;
+            _currentAircraft.OnTouchdown += HandleTouchdown;
+            _currentAircraft.onSortieSuccessful += HandleSortie;
+            _currentAircraft.onSetGear += HandleSetGear;
+            //_currentAircraft.onSetFlightAssist += HandleFlightAssist;
+            //autoHover = false;
+
+            StartCoroutine(WaitForMissileWarning(_currentAircraft));
+        }
+
+        private IEnumerator WaitForMissileWarning(Aircraft ac)
+        {
+            float timeout = 5f;
+            float elapsed = 0f;
+
+            while (elapsed < timeout)
+            {
+                _missileWarningComponent = ac.GetComponent<MissileWarning>() ?? ac.GetComponentInChildren<MissileWarning>();
+                if (_missileWarningComponent != null) break;
+
+                yield return null;
+                elapsed += Time.deltaTime;
+            }
+
+            if (_missileWarningComponent == null)
+            {
+                Logger.LogWarning("[VoicelineMod] Failed to find MissileWarning on Aircraft within timeout.");
+                yield break;
+            }
+
+            Logger.LogInfo($"[VoicelineMod] Found MissileWarning after {elapsed:F2}s");
+            _missileWarningComponent.onMissileWarning += HandleOnMissileWarning;
+            _missileWarningComponent.offMissileWarning += HandleOffMissileWarning;
+        }
+
+        private void HandleOnMissileWarning(MissileWarning.OnMissileWarning args)
+        {
+            string missileName = args.missile.name ?? "";
+            string lower = missileName.ToLowerInvariant();
+            Logger.LogInfo($"Missilewarning by {lower}");
+            if (lower.Contains("sam_radar"))
+                PlayEventIfExists("rwrsarh");
+
+            else if (lower.Contains("aam2") || lower.Contains("aam4"))
+                PlayEventIfExists("rwrarh");
+
+            else if (lower.Contains("aam1") || lower.Contains("aam3") || lower.Contains("sam_ir"))
+                PlayEventIfExists("rwrir");
+            else
+                PlayEventIfExists("rwroptical");
+
+        }
+        private void HandleOffMissileWarning(MissileWarning.OffMissileWarning args)
+        {
+
+            PlayEventIfExists("rwroff");
+        }
+        private void HandleSpawned() => PlayEventIfExists("spawn");
+        private void HandleEject()
+        {
+            PlayEventIfExists("eject");
+            OnLocalPlayerAircraftChanged(null);
+
+        }
+        private void HandleTouchdown() => PlayEventIfExists("touchdown");
+        private void HandleSortie(float _)
+        {
+            PlayEventIfExists("sortie");
+            OnLocalPlayerAircraftChanged(null);
+        }
+        private void HandleSetGear(Aircraft.OnSetGear data)
+        {
+            string key = data.gearState == LandingGear.GearState.LockedExtended ? "geardown"
+                       : data.gearState == LandingGear.GearState.LockedRetracted ? "gearup"
+                       : null;
+            if (key != null) PlayEventIfExists(key);
+        }
+    }
+
+    [HarmonyPatch]
+    static class PlayerPatches
+    {
+        [HarmonyPatch(typeof(Player), nameof(Player.SetAircraft))]
+        static class Player_SetAircraft_Patch
+        {
+            static void Postfix(Player __instance, Aircraft aircraft)
+            {
+                if (!__instance.IsLocalPlayer) return;
+                VoicelineMod.Logger.LogInfo($"Player {__instance.PlayerName} spawned in {aircraft?.name}");
+                VoicelineMod.Instance.OnLocalPlayerAircraftChanged(aircraft);
+            }
+        }/*
+        [HarmonyPatch(typeof(Player), nameof(Player.AddScore))]
+        static class Player_AddScore_Patch
+        {
+            static void Postfix(Player __instance, float score)
+            {
+                if (!__instance.IsLocalPlayer) return;
+                VoicelineMod.Logger.LogInfo($"Player {__instance.PlayerName} awarded score:{score}");
+                VoicelineMod.Instance.PlayEventIfExists("kill");
+            }
+        }*/
+    }
+    [HarmonyPatch]
+    static class SoundManagerPatches
+    {
+        [HarmonyPatch(typeof(AudioSource), "PlayOneShot", typeof(AudioClip))]
+        static void Prefix(AudioSource __instance, AudioClip clip)
+        {
+            if (clip == null || VoicelineMod.Instance?.AudioSource == null) return;
+
+            var name = clip.name.ToLowerInvariant();
+            if (name.Equals("hitmarker1"))
+            {
+                VoicelineMod.Instance.PlayEventIfExists("hit");
+            }
+            else if (name.StartsWith("kill_sound_effect"))
+            {
+                VoicelineMod.Instance.PlayEventIfExists("kill");
+            }
+        }
+
+        private static readonly (Func<WeaponInfo, bool> match, string eventKey)[] MissileEventMap =
+        [
+            (wi => wi.nuclear, "nuclear"),
+            (wi => wi.bomb,    "bomb"),
+            (wi => wi.weaponName.StartsWith("MMR", StringComparison.OrdinalIgnoreCase) || wi.weaponName.StartsWith("IRM", StringComparison.OrdinalIgnoreCase), "fox2"),
+            (wi => wi.weaponName.StartsWith("AAM", StringComparison.OrdinalIgnoreCase), "fox3"),
+            (wi => wi.weaponName.EndsWith("pin", StringComparison.OrdinalIgnoreCase) || wi.weaponName.StartsWith("ATP", StringComparison.OrdinalIgnoreCase), "rocket")
+        ];
+
+        [HarmonyPatch(typeof(WeaponStation), nameof(WeaponStation.LaunchMissile))]
+        static void Prefix(WeaponStation __instance, Unit owner, Unit target, GlobalPosition aimpoint)
+        {
+            if (VoicelineMod.Instance._currentAircraft != owner) return;
+
+            var evt = MissileEventMap.FirstOrDefault(m => m.match(__instance.weaponInfo)).eventKey ?? "missile";
+            VoicelineMod.Instance.PlayEventIfExists(evt);
+        }
+    }
+    [HarmonyPatch]
+    static class AircraftPatches
+    {
+        [HarmonyPatch(typeof(Aircraft), nameof(Aircraft.RpcDamage))]
+        static class Aircraft_RpcDamage_Patch
+        {
+            static void Prefix(Aircraft __instance, byte index, DamageInfo damageInfo)
+            {
+                if (VoicelineMod.Instance._currentAircraft != __instance) return;
+
+                float totalDamage = damageInfo.blastDamage
+                                  + damageInfo.fireDamage
+                                  + damageInfo.impactDamage
+                                  + damageInfo.pierceDamage;
+                if (totalDamage <= VoicelineMod.Instance._minDamage.Value) return;
+
+                VoicelineMod.Instance.PlayEventIfExists("damage");
+            }
+        }
+        [HarmonyPatch(typeof(Aircraft), nameof(Aircraft.KnownRadarWarning))]
+        static class Aircraft_KnownRadarWarning_Patch
+        {
+            static void Postfix(Aircraft __instance, bool __result, Unit radarSource)
+            {
+                if (VoicelineMod.Instance._currentAircraft != __instance || __result) return;
+                VoicelineMod.Instance.PlayEventIfExists("newradarping");
+            }
+        }
+        /*
+        [HarmonyPatch(typeof(Aircraft), nameof(Aircraft.ToggleAutoHover))]
+        static class Aircraft_ToggleAutoHover_Patch
+        {
+            static void Postfix(Aircraft __instance)
+            {
+                if (VoicelineMod.Instance._currentAircraft != __instance) return;
+                VoicelineMod.Instance.autoHover = !VoicelineMod.Instance.autoHover;
+                Debug.Log($"AUTOHOVER IS {VoicelineMod.Instance.autoHover}");
+                if (VoicelineMod.Instance.autoHover) VoicelineMod.Instance.PlayEventIfExists("hover_on");
+                else if (VoicelineMod.Instance.autoHover) VoicelineMod.Instance.PlayEventIfExists("hover_off");
+            }
+        }*/
+        [HarmonyPatch(typeof(AircraftActionsReport), nameof(AircraftActionsReport.ReportText))]
+        static class AircraftActionsReport_ReportText_Patch
+        {
+            static void Postfix(Aircraft __instance, string report, float displayTime)
+            {
+                //Debug.Log($"REPORT {report}");
+                if (report.StartsWith("Stability"))
+                {
+                    if (report.Contains("Enabled")) VoicelineMod.Instance.PlayEventIfExists("stabilityon");
+                    else VoicelineMod.Instance.PlayEventIfExists("stabilityoff");
+                }
+                else if (report.StartsWith("Radar"))
+                {
+                    if (report.Contains("Armed")) VoicelineMod.Instance.PlayEventIfExists("radaron");
+                    else VoicelineMod.Instance.PlayEventIfExists("radaroff");
+                }
+                else if (report.StartsWith("Auto Hover"))
+                {
+                    if (report.Contains("Enabled")) VoicelineMod.Instance.PlayEventIfExists("hoveron");
+                    else VoicelineMod.Instance.PlayEventIfExists("hoveroff");
+                }
+                else if (report.StartsWith("turrets"))
+                {
+                    if (report.Contains("Engage")) VoicelineMod.Instance.PlayEventIfExists("turreton");
+                    else VoicelineMod.Instance.PlayEventIfExists("turretoff");
+                }
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(global::HUDBoresightState), "HUDFixedUpdate")]
+    static class HUDBoresightState_HUDFixedUpdate_Patch
+    {
+        static bool _wasBoresightEnabled = false;
+        static readonly FieldInfo _projectedPositionField =
+            AccessTools.Field(typeof(global::HUDBoresightState), "projectedPosition");
+
+        static void Postfix(global::HUDBoresightState __instance, global::Aircraft aircraft, List<global::Unit> targetList)
+        {
+            if (!VoicelineMod.Instance._modEnabled.Value) return;
+
+            var projectedPosition = _projectedPositionField.GetValue(__instance) as Image;
+            if (projectedPosition == null) return;
+
+            bool isNowEnabled = projectedPosition.enabled;
+            if (isNowEnabled && !_wasBoresightEnabled)
+            {
+                VoicelineMod.Instance.PlayEventIfExists("guns");
+            }
+            _wasBoresightEnabled = isNowEnabled;
+        }
+    }
+}

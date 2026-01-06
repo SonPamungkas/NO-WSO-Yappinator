@@ -1,0 +1,64 @@
+Death = 100
+Eject = 95
+engineLost = 90
+onGLOC = 88
+fireNuclear = 86
+partDetach = 82
+
+# Enginedamage, fallback to takeDamage
+engineDamage = 81
+takeDamage = 80
+noFlares = 72
+
+# RWR alerts, fallback to RwrOn
+RwrOnFox3 = 70
+RwrOnFox2 = 70
+RwrOnFox1 = 70
+RwrOn = 70
+radarPingLocked = 65
+beingJammed = 64
+
+# Kills, fallback to killgeneric
+killAircraft = 63
+killShip = 62
+killGround = 61
+killMissile = 61
+killBuilding = 61
+killGeneric = 61
+
+HitMarker = 60
+
+# Missiles, fallback to fireMissile
+fireFox2 = 55
+fireFox3 = 55
+fireAGM = 55
+fireARM = 55
+fireAGR = 55
+fireCruise = 55
+fireMissile = 55
+
+fireBomb = 55
+guns = 54
+Disembark = 40
+onSortieSuccess = 35
+Touchdown = 34
+RareClip = 30
+Spawn = 25
+radarPingNew = 22
+
+# RWR stop alerts, fallback to RwrOff
+RwrOffFox3 = 21
+RwrOffFox2 = 21
+RwrOffFox1 = 21
+RwrOff = 21
+
+Rearm = 20
+fuelLow = 15
+lowflying = 12
+highflying = 12
+GearUp = 10
+GearDown = 10
+FlightAssistOn = 5
+FlightAssistOff = 5
+AutohoverOn = 5
+AutohoverOff = 5

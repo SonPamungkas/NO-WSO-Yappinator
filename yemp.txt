@@ -1,0 +1,771 @@
+﻿#region
+
+using System.Reflection;
+using System;
+using BepInEx;
+using HarmonyLib;
+using UnityEngine;
+using static Aircraft;
+using static MissileWarning;
+using System.Collections.Generic;
+using System.Collections;
+
+//[BepInPlugin("com.debug.eventlogger", "Debug Event Logger", "1.0.0")]
+public class DebugEventLogger : BaseUnityPlugin
+{
+    public static DebugEventLogger Instance { get; private set; }
+    private Harmony _harmony;
+    public Aircraft _subscribedAircraft;
+    private MissileWarning _subscribedMW;
+    private List<WeaponStation> _hookedStations = new List<WeaponStation>();
+    private void Awake()
+    {
+       // DynamicMap.onMapChanged += HandleMapChanged;
+     //   DynamicMap.onShowTypesChanged += HandleShowTypesChanged;
+        Instance = this;
+        _harmony = new Harmony("com.debug.eventlogger");
+        _harmony.PatchAll();
+        Debug.Log("[DebugEventLogger] Awake: patches applied.");
+        StartCoroutine(WaitAndSubscribeInstanceEvents());
+    }
+
+    private void OnDestroy()
+    {
+        UnsubscribeFromAircraft();
+        _harmony.UnpatchSelf();
+      //  DynamicMap.onMapChanged -= HandleMapChanged;
+     //   DynamicMap.onShowTypesChanged -= HandleShowTypesChanged;
+        if (DynamicMap.i != null)
+        {
+            var dm = DynamicMap.i;
+        //    dm.onMapGenerated -= HandleMapGenerated;
+            dm.onMapMaximized -= HandleMapMaximized;
+            dm.onMapMinimized -= HandleMapMinimized;
+        //    dm.onAllDeselected -= HandleAllDeselected;
+       //     dm.onUnitSelected -= HandleUnitSelected;
+      //      dm.onUnitDeselected -= HandleUnitDeselected;
+        }
+        Debug.Log("[DebugEventLogger] OnDestroy: patches removed.");
+    }
+
+    private void SubscribeToAircraft(Aircraft a)
+    {
+        UnsubscribeFromAircraft();          // clean up old sub
+
+        if (a == null) return;              // nothing to hook
+
+        _subscribedAircraft = a;
+
+        // ------------- aircraft-level events -------------
+        a.onSpawnedInPosition += OnSpawned;
+        a.onEject += OnEject;
+        a.OnTouchdown += OnTouchdown;
+        a.onSortieSuccessful += OnSortieSuccessful;
+        a.onSetGear += OnSetGear;
+        a.onSetFlightAssist += OnFlightAssist;
+        //   a.onShake += OnShake;
+        //a.onRadarWarning += OnRadarWarning;
+        a.onInitialize += OnUnitInitialize;
+        a.onDisableUnit += OnUnitDisable;
+        a.onChangeFaction += OnUnitChangeFaction;
+        a.onRearm += OnUnitRearm;
+        a.onRepair += OnUnitRepair;
+        a.onAddIRSource += OnUnitAddIRSource;
+        a.onRegisterMissile += OnUnitRegisterMissile;
+        a.onDeregisterMissile += OnUnitDeregisterMissile;
+        a.onJam += OnUnitJam;
+
+        foreach (var ws in a.weaponStations)
+            HookWeaponStation(ws);
+
+        HookMissileWarning(a.GetMissileWarningSystem());
+
+        Debug.Log($"[DebugEventLogger] Subscribed to Aircraft '{a.name}' (+ MissileWarning)");
+    }
+
+    private void UnsubscribeFromAircraft()
+    {
+        if (_subscribedAircraft != null)
+        {
+            var a = _subscribedAircraft;
+
+            a.onSpawnedInPosition -= OnSpawned;
+            a.onEject -= OnEject;
+            a.OnTouchdown -= OnTouchdown;
+            a.onSortieSuccessful -= OnSortieSuccessful;
+            a.onSetGear -= OnSetGear;
+            a.onSetFlightAssist -= OnFlightAssist;
+            //   a.onShake -= OnShake; 
+            //a.onRadarWarning -= OnRadarWarning;
+            a.onInitialize -= OnUnitInitialize;
+            a.onDisableUnit -= OnUnitDisable;
+            a.onChangeFaction -= OnUnitChangeFaction;
+            a.onRearm -= OnUnitRearm;
+            a.onRepair -= OnUnitRepair;
+            a.onAddIRSource -= OnUnitAddIRSource;
+            a.onRegisterMissile -= OnUnitRegisterMissile;
+            a.onDeregisterMissile -= OnUnitDeregisterMissile;
+            a.onJam -= OnUnitJam;
+
+        }
+
+        _hookedStations.Clear();
+        UnhookMissileWarning();
+        _subscribedAircraft = null;
+    }
+
+    private IEnumerator WaitAndSubscribeInstanceEvents()
+    {
+        // Wait until the singleton instance is non-null
+        while (DynamicMap.i == null)
+            yield return null;
+
+        var dm = DynamicMap.i;
+      //  dm.onMapGenerated += HandleMapGenerated;
+        dm.onMapMaximized += HandleMapMaximized;
+        dm.onMapMinimized += HandleMapMinimized;
+       // dm.onAllDeselected += HandleAllDeselected;
+        //dm.onUnitSelected += HandleUnitSelected;
+        //dm.onUnitDeselected += HandleUnitDeselected;
+
+        Debug.Log("[DebugDynamicMapLogger] Subscribed to DynamicMap instance events");
+    }
+
+    // --- static event handlers ---
+    /*
+    //spammy
+    private void HandleMapChanged()
+        => Debug.Log("[DynamicMap] onMapChanged fired");
+    
+    private void HandleShowTypesChanged()
+        => Debug.Log("[DynamicMap] onShowTypesChanged fired");
+
+    // --- instance event handlers ---
+    private void HandleMapGenerated()
+        => Debug.Log("[DynamicMap] onMapGenerated fired");
+    */
+    private void HandleMapMaximized()
+        => Debug.Log("[DynamicMap] onMapMaximized fired");
+
+    private void HandleMapMinimized()
+        => Debug.Log("[DynamicMap] onMapMinimized fired");
+    /*
+    private void HandleAllDeselected()
+        => Debug.Log("[DynamicMap] onAllDeselected fired");
+
+    private void HandleUnitSelected(Unit u)
+        => Debug.Log($"[DynamicMap] onUnitSelected fired → {u.unitName}");
+
+    private void HandleUnitDeselected(Unit u)
+        => Debug.Log($"[DynamicMap] onUnitDeselected fired → {u.unitName}");
+    */
+    // on spawn
+    private void OnUnitInitialize()
+    {
+        Debug.Log($"[DebugEventLogger1] Unit.onInitialize on '{_subscribedAircraft.unitName}'");
+    }
+    // on any despawn. crash, eject or dismount
+    private void OnUnitDisable(Unit u)
+    {
+        // sanity check (should always be the same as _subscribedAircraft)
+        Debug.Log($"[DebugEventLogger1] Unit.onDisableUnit for '{u.unitName}'");
+    }
+
+    // not used
+    private void OnUnitChangeFaction(Unit u)
+    {
+        Debug.Log($"[DebugEventLogger1] Unit.onChangeFaction for '{u.unitName}' (new faction: {u.NetworkHQ.name})");
+    }
+
+    // on rearm
+    private void OnUnitRearm(Unit.OnRearm data)
+    {
+        Debug.Log($"[DebugEventLogger1] Unit.onRearm → rearmed by '{data.rearmer?.name}'");
+    }
+
+    // not used
+    private void OnUnitRepair(Unit.OnRepair data)
+    {
+        Debug.Log($"[DebugEventLogger1] Unit.onRepair → repaired by '{data.repairer?.name}'");
+    }
+
+    // spawn flares
+    private void OnUnitAddIRSource(IRSource src)
+    {
+        Debug.Log($"[DebugEventLogger1] Unit.onAddIRSource → IR source '{src}' added");
+    }
+
+    // spawn missile
+    private void OnUnitRegisterMissile(Missile m)
+    {
+        Debug.Log($"[DebugEventLogger1] Unit.onRegisterMissile → missile '{m.unitName}' registered, target {m.GetTargetInfo()}");
+    }
+
+    // despawn missile
+    private void OnUnitDeregisterMissile(Missile m)
+    {
+        Debug.Log($"[DebugEventLogger1] Unit.onDeregisterMissile → missile '{m.name}' deregistered");
+    }
+
+    // being jammed
+    private void OnUnitJam(Unit.OnJam data)
+    {
+        Debug.Log($"[DebugEventLogger1] Unit.onJam → jammer '{data.jammingUnit}' intensity={data.jamAmount:F2}");
+    }
+
+
+    // not used?
+    private void HookWeaponStation(WeaponStation ws)
+    {
+        if (ws == null || _hookedStations.Contains(ws)) return;
+        _hookedStations.Add(ws);
+        Debug.Log($"[DebugEventLogger]    ↳ Hooked WeaponStation '{ws.weaponInfo.weaponName}'");
+        // WeaponStation has no .event you can subscribe— 
+        // we’ll patch its methods via Harmony below.
+    }
+
+    // change weapon
+    [HarmonyPatch(typeof(WeaponStation), nameof(WeaponStation.SetStationActive))]
+    static class WS_SetStationActive_Patch
+    {
+        static void Prefix(WeaponStation __instance, Aircraft aircraft, bool isActive)
+        {
+            if (isActive)
+                Debug.Log($"[WS] SetStationActive on '{__instance.weaponInfo.weaponName}' for AC='{aircraft?.name}', isActive={isActive}");
+        }
+    }
+    /*
+    // weaponsafety. duplicate function
+    [HarmonyPatch(typeof(WeaponStation), nameof(WeaponStation.SafetyIsOn))]
+    static class WS_SafetyIsOn_Patch
+    {
+        static void Postfix(WeaponStation __instance, Aircraft aircraft, bool __result)
+            => Debug.Log($"[WS?] SafetyIsOn on '{__instance.weaponInfo.weaponName}' for AC='{aircraft?.name}' → {__result}");
+    }
+    */
+    /*
+    // GearSafety, duplicate function
+    [HarmonyPatch(typeof(WeaponStation), nameof(WeaponStation.GearSafety))]
+    static class WS_GearSafety_Patch
+    {
+        static void Postfix(WeaponStation __instance, Aircraft aircraft, bool __result)
+            => Debug.Log($"[WS?] GearSafety on '{__instance.weaponInfo.weaponName}' for AC='{aircraft?.name}' → {__result}");
+    }
+    */
+    // not used?
+    [HarmonyPatch(typeof(WeaponStation), nameof(WeaponStation.RemoteFireAuto))]
+    static class WS_RemoteFireAuto_Patch
+    {
+        static void Prefix(WeaponStation __instance, Unit owner)
+            => Debug.Log($"[WS] RemoteFireAuto on '{__instance.weaponInfo.weaponName}' by '{owner?.name}'");
+    }
+
+    // not used?
+    [HarmonyPatch(typeof(WeaponStation), nameof(WeaponStation.RemoteFireSingle))]
+    static class WS_RemoteFireSingle_Patch
+    {
+        static void Prefix(WeaponStation __instance, Unit owner)
+            => Debug.Log($"[WS] RemoteFireSingle on '{__instance.weaponInfo.weaponName}' by '{owner?.name}'");
+    }
+
+    // launch missile
+    [HarmonyPatch(typeof(WeaponStation), nameof(WeaponStation.LaunchMissile))]
+    static class WS_LaunchMissile_Patch
+    {
+        static void Prefix(WeaponStation __instance, Unit owner, Unit target, GlobalPosition aimpoint)
+            => Debug.Log($"[WS] LaunchMissile on '{__instance.weaponInfo.weaponName}' owner='{owner?.name}' target='{target?.name}'");
+    }
+
+    // fire gun/jam pod. very spammy. also returns ai/others firing
+    [HarmonyPatch(typeof(WeaponStation), nameof(WeaponStation.Fire))]
+    static class WS_Fire_Patch
+    {
+        static void Prefix(WeaponStation __instance, Unit owner, Unit target)
+            => Debug.Log($"[WS] Fire on '{__instance.weaponInfo.weaponName}' owner='{owner?.name}' target='{target?.name}'");
+    }
+    /*
+    // SetStationTargets(byte, int[])
+    [HarmonyPatch(typeof(WeaponStation), nameof(WeaponStation.SetStationTargets),
+        new Type[] { typeof(byte), typeof(int[]) })]
+    static class WS_SetStationTargets_Patch
+    {
+        static void Prefix(WeaponStation __instance, byte stationIndex, int[] targetIDs)
+            => Debug.Log($"[WS] SetStationTargets on '{__instance.weaponInfo.weaponName}' station={stationIndex} targets=[{string.Join(",", targetIDs)}]");
+    }
+    */
+    /*
+    // gunner targeting
+    [HarmonyPatch(typeof(WeaponStation), nameof(WeaponStation.SetStationTurretTarget),
+        new Type[] { typeof(byte), typeof(byte), typeof(int[]) })]
+    static class WS_SetStationTurretTarget_Patch
+    {
+        static void Prefix(WeaponStation __instance, byte stationIndex, byte turretIndex, int[] targetIDs)
+            => Debug.Log($"[WS] SetStationTurretTarget on '{__instance.weaponInfo.weaponName}' station={stationIndex}, turret={turretIndex}, targets=[{string.Join(",", targetIDs)}]");
+    }
+    */
+    /*
+    // SetActiveStation(byte)
+    [HarmonyPatch(typeof(WeaponStation), nameof(WeaponStation.SetStationActive))]
+    static class WS_SetActiveStation_Patch
+    {
+        static void Prefix(WeaponStation __instance, byte stationIndex)
+            => Debug.Log($"[WS] SetActiveStation on '{__instance.weaponInfo.weaponName}' station={stationIndex}");
+    }
+    */
+
+    //not used?
+    private void HookMissileWarning(MissileWarning mw)
+    {
+        if (mw == null) return;
+
+        _subscribedMW = mw;
+        mw.onMissileWarning += OnMissileWarning;
+        mw.offMissileWarning += OffMissileWarning;
+
+        Debug.Log($"[DebugEventLogger]    ↳ Hooked MissileWarning component '{mw.name}'");
+    }
+    //not used?
+    private void UnhookMissileWarning()
+    {
+        if (_subscribedMW == null) return;
+
+        _subscribedMW.onMissileWarning -= OnMissileWarning;
+        _subscribedMW.offMissileWarning -= OffMissileWarning;
+
+        Debug.Log($"[DebugEventLogger]    ↳ Unhooked MissileWarning");
+        _subscribedMW = null;
+    }
+    //not used?
+    private void OnMissileWarning(MissileWarning.OnMissileWarning data)
+    {
+        Debug.Log($"[DebugEventLogger] onMissileWarning fired → missile='{data.missile?.name}'");
+    }
+    //not used?
+    private void OffMissileWarning(MissileWarning.OffMissileWarning data)
+    {
+        Debug.Log($"[DebugEventLogger] offMissileWarning fired → missile='{data.missile?.name}'");
+    }
+    // missile warning
+    [HarmonyPatch]
+    static class MissileWarning_LockedByMissile_Patch
+    {
+        // private void LockedByMissile(Aircraft aircraft, Missile missile)
+        static MethodBase TargetMethod() =>
+            AccessTools.Method(typeof(MissileWarning),
+                               "LockedByMissile",
+                               new Type[] { typeof(Aircraft), typeof(Missile) });
+
+        static void Prefix(MissileWarning __instance, Aircraft aircraft, Missile missile)
+        {
+            Debug.Log($"[DebugEventLogger] MissileWarning.LockedByMissile → ac='{aircraft?.name}', missile='{missile?.name}'");
+        }
+    }
+
+    private void OnSpawned() => Debug.Log("[DebugEventLogger] onSpawnedInPosition fired");
+    private void OnEject() => Debug.Log("[DebugEventLogger] onEject fired");
+    private void OnTouchdown() => Debug.Log("[DebugEventLogger] OnTouchdown fired");
+    private void OnSortieSuccessful(float score) => Debug.Log($"[DebugEventLogger] onSortieSuccessful fired (score={score})");
+    private void OnSetGear(Aircraft.OnSetGear d) => Debug.Log($"[DebugEventLogger] onSetGear fired (lowering={d.gearState})");
+    private void OnFlightAssist(Aircraft.OnFlightAssistToggle d)
+                                                 => Debug.Log($"[DebugEventLogger] onSetFlightAssist fired (enabled={d.enabled})");
+    private void OnShake(Aircraft.OnShake d) => Debug.Log($"[DebugEventLogger] onShake fired (force={d})");
+
+    // define player aircraft
+    [HarmonyPatch(typeof(Player), nameof(Player.SetAircraft))]
+    static class Player_SetAircraft_Patch
+    {
+        static void Postfix(Player __instance, Aircraft aircraft)
+        {
+            if (!__instance.IsLocalPlayer) return;
+            DebugEventLogger.Instance.SubscribeToAircraft(aircraft);
+        }
+    }
+    /*
+    // Example method patches:
+    [HarmonyPatch(typeof(Aircraft), nameof(Aircraft.StartEjectionSequence))]
+    static class Aircraft_StartEjectionSequence_Patch
+    {
+        static void Prefix(Aircraft __instance)
+            => Debug.Log("[DebugEventLogger] Method StartEjectionSequence called");
+    }
+    */
+    /*
+    [HarmonyPatch(typeof(Aircraft), nameof(Aircraft.OpenCanopies))]
+    static class Aircraft_OpenCanopies_Patch
+    {
+        static void Prefix(Aircraft __instance)
+            => Debug.Log("[DebugEventLogger] Method OpenCanopies called");
+    }
+    */
+
+
+
+
+    [HarmonyPatch(typeof(Aircraft), nameof(Aircraft.CmdLaunchMissile))]
+    static class Aircraft_CmdLaunchMissile_Patch
+    {
+        static void Prefix(Aircraft __instance, byte stationIndex, Unit target, GlobalPosition aimpoint)
+            => Debug.Log($"[DebugEventLogger?] Method CmdLaunchMissile called (station={stationIndex})");
+    }
+    /*
+    // launch missile, duplicate?
+    [HarmonyPatch(typeof(Aircraft), nameof(Aircraft.RpcLaunchMissile),
+        new Type[] { typeof(byte), typeof(Unit), typeof(GlobalPosition) })]
+    static class Aircraft_RpcLaunchMissile_Patch
+    {
+        static void Prefix(Aircraft __instance, byte stationIndex, Unit target, GlobalPosition aimpoint)
+        {
+            Debug.Log($"[DebugEventLogger] RpcLaunchMissile called on '{__instance.unitName}' → station={stationIndex}, target={target?.unitName}");
+        }
+    }*/
+
+    // radar pings
+    [HarmonyPatch(typeof(Aircraft), nameof(Aircraft.KnownRadarWarning), new Type[] { typeof(Unit) })]
+    static class Aircraft_KnownRadarWarning_Patch
+    {
+        static void Postfix(Aircraft __instance, Unit radarSource, bool __result)
+        {
+            // only new pings
+            if (__result == false)
+                Debug.Log($"[DebugEventLogger] KnownRadarWarning called on '{__instance.unitName}' from source '{radarSource?.name}");
+        }
+    }
+    /*
+    // periodic, unneeded
+    [HarmonyPatch(typeof(Aircraft), nameof(Aircraft.GetMissileWarningSystem))]
+    static class Aircraft_GetMissileWarningSystem_Patch
+    {
+        static void Postfix(Aircraft __instance, MissileWarning __result)
+        {
+            Debug.Log($"[DebugEventLogger?] GetMissileWarningSystem called on '{__instance.unitName}' → returned {(__result != null ? __result.name : "null")}");
+        }
+    }
+    */
+    // new radar ping
+    [HarmonyPatch(typeof(Aircraft), nameof(Aircraft.LockedByMissile), new Type[] { typeof(Missile) })]
+    static class Aircraft_LockedByMissile_Patch
+    {
+        static void Prefix(Aircraft __instance, Missile missile)
+        {
+            Debug.Log($"[DebugEventLogger] LockedByMissile called on '{__instance.unitName}' with missile '{missile?.unitName}'");
+        }
+    }
+
+    // toggle radar on/off
+    [HarmonyPatch(typeof(Aircraft), nameof(Aircraft.CmdToggleRadar))]
+    static class Aircraft_CmdToggleRadar_Patch
+    {
+        static void Prefix(Aircraft __instance)
+        {
+            Debug.Log($"[DebugEventLogger?] CmdToggleRadar called on '{__instance.unitName}'");
+        }
+    }
+    /*
+    // toggle radar on/off, duplicate?
+    [HarmonyPatch]
+    static class Aircraft_RpcToggleRadar_Patch
+    {
+        static MethodBase TargetMethod()
+            => AccessTools.Method(typeof(Aircraft), "RpcToggleRadar", new Type[] { typeof(bool) });
+
+        static void Prefix(Aircraft __instance, bool activated)
+        {
+            Debug.Log($"[DebugEventLogger] RpcToggleRadar called on '{__instance.unitName}' → activated={activated}");
+        }
+    }
+    */
+
+    // toggle autohover
+    [HarmonyPatch(typeof(Aircraft), nameof(Aircraft.ToggleAutoHover))]
+    static class Aircraft_ToggleAutoHover_Patch
+    {
+        static void Prefix(Aircraft __instance)
+        {
+            Debug.Log($"[DebugEventLogger] ToggleAutoHover called on '{__instance.unitName}'");
+        }
+    }
+
+    // not working?
+    [HarmonyPatch(typeof(Aircraft), nameof(Aircraft.SetRadar))]
+    static class Aircraft_SetRadar_Patch
+    {
+        static void Prefix(Aircraft __instance, global::Radar radar)
+        {
+            Debug.Log($"[DebugEventLogger] SetRadar called on '{__instance.unitName}' → radar={(radar != null ? radar.name : "null")}");
+        }
+    }
+
+    // countermeasures requested
+    [HarmonyPatch(typeof(Aircraft), nameof(Aircraft.Countermeasures))]
+    static class Aircraft_Countermeasures_Patch
+    {
+        static void Prefix(Aircraft __instance, bool active, byte index)
+        {
+            Debug.Log($"[DebugEventLogger] Countermeasures called on '{__instance.unitName}' → active={active}, slot={index}");
+        }
+    }
+
+    // select target
+    [HarmonyPatch(typeof(Aircraft), nameof(Aircraft.SetStationTargets), new Type[] { typeof(byte), typeof(int[]) })]
+    static class Aircraft_SetStationTargets_Patch
+    {
+        static void Prefix(Aircraft __instance, byte stationIndex, int[] targetIDs)
+        {
+            var names = new List<string>();
+            if (targetIDs != null)
+            {
+                foreach (var id in targetIDs)
+                {
+                    if (global::UnitRegistry.TryGetUnit(id, out var unit) && unit != null)
+                        names.Add(unit.unitName);
+                    else
+                        names.Add($"#{id}");
+                }
+            }
+
+            Debug.Log(
+                $"[DebugEventLogger] SetStationTargets on '{__instance.unitName}' " +
+                $"→ station={stationIndex}, targets=[{string.Join(", ", names)}]"
+            );
+        }
+    }
+
+    // not working/used?
+    [HarmonyPatch(typeof(Aircraft), nameof(Aircraft.SetStationTurretTarget),
+        new Type[] { typeof(byte), typeof(byte), typeof(int[]) })]
+    static class Aircraft_SetStationTurretTarget_Patch
+    {
+        static void Prefix(Aircraft __instance, byte stationIndex, byte turretIndex, int[] targetIDs)
+        {
+            Debug.Log($"[DebugEventLogger] SetStationTurretTarget called on '{__instance.unitName}' → station={stationIndex}, turret={turretIndex}, targets=[{string.Join(",", targetIDs ?? Array.Empty<int>())}]");
+        }
+    }
+
+    // select weapon
+    [HarmonyPatch(typeof(Aircraft), nameof(Aircraft.SetActiveStation))]
+    static class Aircraft_SetActiveStation_Patch
+    {
+        static void Prefix(Aircraft __instance, byte stationIndex)
+        {
+            Debug.Log($"[DebugEventLogger] SetActiveStation called on '{__instance.unitName}' → station={stationIndex}");
+        }
+    }
+
+    /*
+    //detect damage, very spammy
+    [HarmonyPatch(typeof(Aircraft), nameof(Aircraft.RpcDamage),
+    new Type[] { typeof(byte), typeof(DamageInfo) })]
+    static class Aircraft_RpcDamage_Patch
+    {
+        static void Prefix(Aircraft __instance, byte index, DamageInfo damageInfo)
+        {
+            //minimum damage
+            //if ((damageInfo.blastDamage + damageInfo.fireDamage + damageInfo.impactDamage + damageInfo.pierceDamage)> 50000)
+            Debug.Log($"[Debug] RpcDamage on '{__instance.unitName}' → idx={index}, damageInfo="
+                      + $"blast:{damageInfo.blastDamage:F1}, fire:{damageInfo.fireDamage:F1}, "
+                      + $"impact:{damageInfo.impactDamage:F1}, pierce:{damageInfo.pierceDamage:F1}");
+        }
+    }
+    */
+    //check fuel. called twice per check. periodic, 1 second?
+    [HarmonyPatch(typeof(Aircraft), nameof(Aircraft.CheckNeedsFuel))]
+    static class Aircraft_CheckNeedsFuel_Patch
+    {
+        static void Prefix(Aircraft __instance, float fuelRatio)
+        {
+            //TODO: add one time bool
+            // low fuel
+            if (fuelRatio < 0.2)
+                Debug.Log($"[DebugEventLogger] CheckNeedsFuel on '{__instance.unitName}' → fuelRatio={fuelRatio:F2}");
+        }
+    }
+
+    [HarmonyPatch(typeof(Unit))]
+    public static class UnitMethodPatches
+    {
+        // 1) RecordDamage(int lastDamagedBy, float damageAmount)
+        [HarmonyPrefix]
+        [HarmonyPatch(nameof(Unit.RecordDamage), new Type[] { typeof(int), typeof(float) })]
+        static void Prefix_RecordDamage(Unit __instance, int lastDamagedBy, float damageAmount)
+        {
+            if (__instance != DebugEventLogger.Instance._subscribedAircraft) return;
+            Debug.Log($"[DBG] RecordDamage → lastDamagedBy={lastDamagedBy}, amount={damageAmount:F1}");
+        }
+
+        // 2) RegisterHit(Unit hitUnit, Vector3 relativePos, Vector3 bulletVelocity, float muzzleVelocity, float pierceDamage, float blastDamage)
+        [HarmonyPrefix]
+        [HarmonyPatch(nameof(Unit.RegisterHit),
+                      new Type[] { typeof(Unit), typeof(Vector3), typeof(Vector3), typeof(float), typeof(float), typeof(float) })]
+        static void Prefix_RegisterHit(Unit __instance,
+                                       Unit hitUnit,
+                                       Vector3 relativePos,
+                                       Vector3 bulletVelocity,
+                                       float muzzleVelocity,
+                                       float pierceDamage,
+                                       float blastDamage)
+        {
+            if (__instance != DebugEventLogger.Instance._subscribedAircraft) return;
+            Debug.Log($"[DBG] RegisterHit → target='{hitUnit?.unitName}', relPos={relativePos}, " +
+                      $"vel={bulletVelocity}, muzzleV={muzzleVelocity:F1}, pierce={pierceDamage:F1}, blast={blastDamage:F1}");
+        }
+
+        // 3) Damage(byte index, DamageInfo damageInfo)
+        [HarmonyPrefix]
+        [HarmonyPatch(nameof(Unit.Damage), new Type[] { typeof(byte), typeof(DamageInfo) })]
+        static void Prefix_Damage(Unit __instance, byte index, DamageInfo damageInfo)
+        {
+            if (__instance != DebugEventLogger.Instance._subscribedAircraft) return;
+            Debug.Log($"[DBG] Damage(index={index}) → total={(damageInfo.blastDamage + damageInfo.fireDamage + damageInfo.impactDamage + damageInfo.pierceDamage):F1}");
+        }
+
+        // 4) FuelTankStatus(byte partID, bool ruptured, bool onFire)
+        [HarmonyPrefix]
+        [HarmonyPatch(nameof(Unit.FuelTankStatus), new Type[] { typeof(byte), typeof(bool), typeof(bool) })]
+        static void Prefix_FuelTankStatus(Unit __instance, byte partID, bool ruptured, bool onFire)
+        {
+            if (__instance != DebugEventLogger.Instance._subscribedAircraft) return;
+            Debug.Log($"[DBG] FuelTankStatus → part={partID}, ruptured={ruptured}, onFire={onFire}");
+        }
+
+        // 5) DetachPart(byte partID, Vector3 velocity, Vector3 relativePos)
+        [HarmonyPrefix]
+        [HarmonyPatch(nameof(Unit.DetachPart), new Type[] { typeof(byte), typeof(Vector3), typeof(Vector3) })]
+        static void Prefix_DetachPart(Unit __instance, byte partID, Vector3 velocity, Vector3 relativePos)
+        {
+            if (__instance != DebugEventLogger.Instance._subscribedAircraft) return;
+            Debug.Log($"[DBG] DetachPart → part={partID}, vel={velocity}, relPos={relativePos}");
+        }
+
+        // 6) ReportKilled()
+        [HarmonyPrefix]
+        [HarmonyPatch(nameof(Unit.ReportKilled))]
+        static void Prefix_ReportKilled(Unit __instance)
+        {
+            if (__instance != DebugEventLogger.Instance._subscribedAircraft) return;
+            Debug.Log($"[DBG] ReportKilled on '{__instance.unitName}'");
+        }
+
+        // 7) CheckRadarAlt()
+        [HarmonyPrefix]
+        [HarmonyPatch(nameof(Unit.CheckRadarAlt))]
+        static void Prefix_CheckRadarAlt(Unit __instance)
+        {
+            if (__instance != DebugEventLogger.Instance._subscribedAircraft) return;
+            Debug.Log($"[DBG] CheckRadarAlt on '{__instance.unitName}'");
+        }
+    }
+    // 1) public void Fire()
+    [HarmonyPatch(typeof(Pilot), nameof(Pilot.Fire))]
+    static class Pilot_Fire_Patch
+    {
+        static void Prefix(Pilot __instance)
+            => Debug.Log($"[Pilot] Fire() called on '{__instance.name}'");
+    }
+
+    // 2) public void Remove()
+    [HarmonyPatch(typeof(Pilot), nameof(Pilot.Remove))]
+    static class Pilot_Remove_Patch
+    {
+        static void Prefix(Pilot __instance)
+            => Debug.Log($"[Pilot] Remove() called on '{__instance.name}'");
+    }
+
+    // 3) public UnitPart GetUnitPart()
+    [HarmonyPatch(typeof(Pilot), nameof(Pilot.GetUnitPart))]
+    static class Pilot_GetUnitPart_Patch
+    {
+        static void Postfix(Pilot __instance, ref UnitPart __result)
+            => Debug.Log($"[Pilot] GetUnitPart() → {(__result != null ? __result.name : "null")}");
+    }
+
+    // 4) public void SwitchWeapon()
+    [HarmonyPatch(typeof(Pilot), nameof(Pilot.SwitchWeapon))]
+    static class Pilot_SwitchWeapon_Patch
+    {
+        static void Prefix(Pilot __instance)
+            => Debug.Log($"[Pilot] SwitchWeapon() called on '{__instance.name}'");
+    }
+
+    // 5) public void TakeDamage(float pierceDamage, float blastDamage, float amountAffected, float fireDamage, float impactDamage, int dealerID)
+    [HarmonyPatch(typeof(Pilot), nameof(Pilot.TakeDamage),
+        new Type[] { typeof(float), typeof(float), typeof(float), typeof(float), typeof(float), typeof(int) })]
+    static class Pilot_TakeDamage_Patch
+    {
+        static void Prefix(Pilot __instance,
+                           float pierceDamage,
+                           float blastDamage,
+                           float amountAffected,
+                           float fireDamage,
+                           float impactDamage,
+                           int dealerID)
+        {
+            Debug.Log($"[Pilot] TakeDamage(pierce={pierceDamage:F1}, blast={blastDamage:F1}, affected={amountAffected:F1}, fire={fireDamage:F1}, impact={impactDamage:F1}, dealerID={dealerID})");
+        }
+    }
+
+    // 6) public void ApplyDamage(float pierceDamage, float blastDamage, float fireDamage, float impactDamage)
+    [HarmonyPatch(typeof(Pilot), nameof(Pilot.ApplyDamage),
+        new Type[] { typeof(float), typeof(float), typeof(float), typeof(float) })]
+    static class Pilot_ApplyDamage_Patch
+    {
+        static void Prefix(Pilot __instance,
+                           float pierceDamage,
+                           float blastDamage,
+                           float fireDamage,
+                           float impactDamage)
+        {
+            Debug.Log($"[Pilot] ApplyDamage(pierce={pierceDamage:F1}, blast={blastDamage:F1}, fire={fireDamage:F1}, impact={impactDamage:F1})");
+        }
+    }
+
+    // 7) public void TakeShockwave(Vector3 origin, float blastEffectScale, float blastPower)
+    [HarmonyPatch(typeof(Pilot), nameof(Pilot.TakeShockwave),
+        new Type[] { typeof(Vector3), typeof(float), typeof(float) })]
+    static class Pilot_TakeShockwave_Patch
+    {
+        static void Prefix(Pilot __instance,
+                           Vector3 origin,
+                           float blastEffectScale,
+                           float blastPower)
+        {
+            Debug.Log($"[Pilot] TakeShockwave(origin={origin}, scale={blastEffectScale:F2}, power={blastPower:F2})");
+        }
+    }
+
+    // 8) public void SetPrimaryTarget(Unit target)
+    [HarmonyPatch(typeof(Pilot), nameof(Pilot.SetPrimaryTarget))]
+    static class Pilot_SetPrimaryTarget_Patch
+    {
+        static void Prefix(Pilot __instance, Unit target)
+            => Debug.Log($"[Pilot] SetPrimaryTarget(target={(target != null ? target.unitName : "null")})");
+    }
+
+    // unusable
+    [HarmonyPatch]
+    static class Pilot_OnDestroy_Patch
+    {
+        static MethodBase TargetMethod()
+            => AccessTools.Method(typeof(Pilot), "OnDestroy", Type.EmptyTypes);
+
+        static void Prefix(Pilot __instance)
+            => Debug.Log($"[Pilot] OnDestroy() called on '{__instance.name}'");
+    }
+
+    // 10) public void TakeGForceDamage(float sqrGForces)
+    [HarmonyPatch(typeof(Pilot), nameof(Pilot.TakeGForceDamage))]
+    static class Pilot_TakeGForceDamage_Patch
+    {
+        static void Prefix(Pilot __instance, float sqrGForces)
+            => Debug.Log($"[Pilot] TakeGForceDamage(sqrGForces={sqrGForces:F2})");
+    }
+
+    // 11) public void TakeWaterDamage(float damage)
+    [HarmonyPatch(typeof(Pilot), nameof(Pilot.TakeWaterDamage))]
+    static class Pilot_TakeWaterDamage_Patch
+    {
+        static void Prefix(Pilot __instance, float damage)
+            => Debug.Log($"[Pilot] TakeWaterDamage(damage={damage:F1})");
+    }
+
+}
+#endregion
