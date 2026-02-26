@@ -10,7 +10,7 @@ namespace WSOYappinator.Patches
         {
             if (!GameManager.IsLocalPlayer(player)) return;
 
-            Plugin.instance.TriggerVoiceline(target switch
+            Plugin.I.TriggerVoiceline(target switch
             {
                 GroundVehicle => VoiceEvent.killGround,
                 Building => VoiceEvent.killBuilding,

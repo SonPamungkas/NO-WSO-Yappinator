@@ -5,26 +5,33 @@ using System.Linq;
 
 namespace WSOYappinator
 {
-    public sealed class AudioSetManager(IEventPriorityLoader priorityLoader, VoicelineCatalog catalog)
+    public sealed class AudioSetManager(FileEventPriorityLoader priorityLoader, VoicelineCatalog catalog)
     {
         public string AudioSetFolder { get; private set; }
         public Dictionary<VoiceEvent, int> EventPriorities { get; private set; } = [];
 
-        private readonly IEventPriorityLoader _priorityLoader = priorityLoader;
+        private readonly FileEventPriorityLoader _priorityLoader = priorityLoader;
         private readonly VoicelineCatalog _catalog = catalog;
         public VoicelineCatalog Catalog => _catalog;
 
         public void Initialize(string baseFolder, string selectedSet)
         {
+            if (string.IsNullOrWhiteSpace(selectedSet))
+            {
+                Plugin.I.Log.LogWarning("No audio set selected.");
+                _catalog.Clear();
+                EventPriorities.Clear();
+                return;
+            }
             AudioSetFolder = Path.Combine(baseFolder, selectedSet);
-            Plugin.instance.Log.LogInfo($"Initializing set folder: {AudioSetFolder}");
+            Plugin.I.Log.LogInfo($"Initializing set folder: {AudioSetFolder}");
 
             _catalog.Clear();
             EventPriorities.Clear();
 
             if (!Directory.Exists(AudioSetFolder))
             {
-                Plugin.instance.Log.LogWarning($"audio set folder not found: {AudioSetFolder}");
+                Plugin.I.Log.LogWarning($"audio set folder not found: {AudioSetFolder}");
                 return;
             }
 
@@ -33,11 +40,11 @@ namespace WSOYappinator
             foreach (KeyValuePair<string, int> kvp in raw)
             {
                 if (VoiceEventMaps.TryParse(kvp.Key, out VoiceEvent evt)) EventPriorities[evt] = kvp.Value;
-                else Plugin.instance.Log.LogWarning($"Unknown event key in priorities: [{kvp.Key}]");
+                else Plugin.I.Log.LogWarning($"Unknown event key in priorities: [{kvp.Key}]");
                 
             }
 
-            Plugin.instance.Log.LogInfo($"Registering events for set [{selectedSet}] ({EventPriorities.Count} events)");
+            Plugin.I.Log.LogInfo($"Registering events for set [{selectedSet}] ({EventPriorities.Count} events)");
 
             var allEvents = Enum.GetValues(typeof(VoiceEvent)).Cast<VoiceEvent>();
             _catalog.RegisterAllFromFolder(AudioSetFolder, allEvents);

@@ -65,7 +65,19 @@
         FlightAssistOn,
         FlightAssistOff,
         AutohoverOn,
-        AutohoverOff
+        AutohoverOff,
+
+        OutcomeVictory,
+        OutcomeDefeat,
+        Escalation,
+        EscalationTactical,
+        EscalationStrategic,
+
+        FirstNuke,
+        FirstNukeFriendly,
+        FirstNukeHostile,
+
+        Idle,
     }
 }
 /*
@@ -77,10 +89,11 @@ fuelLeak,
 hookAttached, 
 hookReleased, 
 cargoDeployed,
-waypointReached,
-objectiveComplete,
-objectiveFailed,
-objectiveDestroyed,
-missionVictory,
-missionDefeat,
-firstNukeStrike,*/
+
+*/
+
+/* TODO See: MissionManager.onObjectiveStarted and onObjectiveCompleted
+ObjectiveNew,
+ObjectiveCompleted,
+ObjectiveFailed,
+*/

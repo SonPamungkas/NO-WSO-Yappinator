@@ -11,7 +11,7 @@ namespace WSOYappinator.Patches
         private static void Postfix(MountedMissile __instance, Unit owner, Unit target, Vector3 inheritedVelocity,
                                     WeaponStation weaponStation, GlobalPosition aimpoint)
         {
-            if (GameManager.IsLocalAircraft(owner as Aircraft)) Plugin.instance.TriggerVoiceline(ResolveFireEvent(__instance));
+            if (GameManager.IsLocalAircraft(owner as Aircraft)) Plugin.I.TriggerVoiceline(ResolveFireEvent(__instance));
         }
 
         private static readonly Dictionary<WeaponInfo, VoiceEvent> _fireEventCache = [];

@@ -28,7 +28,7 @@ namespace WSOYappinator
         {
             if (!Directory.Exists(audioSetFolder))
             {
-                Plugin.instance.Log.LogWarning($"Missing audio folder: {audioSetFolder}");
+                Plugin.I.Log.LogWarning($"Missing audio folder: {audioSetFolder}");
                 return;
             }
 
@@ -64,7 +64,7 @@ namespace WSOYappinator
                 }
             }
 
-            foreach (KeyValuePair<VoiceEvent, List<AudioClip>> kvp in Clips) Plugin.instance.Log.LogInfo($"Registered [{kvp.Key}] ({kvp.Value.Count} clips)");
+            foreach (KeyValuePair<VoiceEvent, List<AudioClip>> kvp in Clips) Plugin.I.Log.LogInfo($"Registered [{kvp.Key}] ({kvp.Value.Count} clips)");
         }
 
         public AudioClip RequestClip(VoiceEvent key)

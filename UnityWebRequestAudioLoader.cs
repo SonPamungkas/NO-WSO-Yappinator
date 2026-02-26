@@ -27,17 +27,17 @@ namespace WSOYappinator
 
             if (loader.error != null)
             {
-                Plugin.instance.Log.LogError(loader.error);
+                Plugin.I.Log.LogError(loader.error);
                 return null;
             }
             AudioClip clip = DownloadHandlerAudioClip.GetContent(loader);
             if (clip && clip.loadState == AudioDataLoadState.Loaded)
             {
-                clip.name = path.TrimStart(Plugin.instance.Info.Location.ToCharArray());
+                clip.name = path.TrimStart(Plugin.I.Info.Location.ToCharArray());
                 return clip;
             }
 
-            Plugin.instance.Log.LogError($"Failed to load clip:{path}");
+            Plugin.I.Log.LogError($"Failed to load clip:{path}");
             return null;
 
         }

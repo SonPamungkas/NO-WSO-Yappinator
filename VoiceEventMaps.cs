@@ -48,6 +48,12 @@ namespace WSOYappinator
             { VoiceEvent.killAircraft,new[] { VoiceEvent.killGeneric} },
             { VoiceEvent.killBuilding,new[] { VoiceEvent.killGround, VoiceEvent.killGeneric } },
             { VoiceEvent.killGround,new[] { VoiceEvent.killGeneric} },
+
+            { VoiceEvent.EscalationTactical,new[] { VoiceEvent.Escalation} },
+            { VoiceEvent.EscalationStrategic,new[] { VoiceEvent.Escalation} },
+
+            { VoiceEvent.FirstNukeFriendly,new[] { VoiceEvent.FirstNuke} },
+            { VoiceEvent.FirstNukeHostile,new[] { VoiceEvent.FirstNuke} },
         };
 
         public static bool TryParse(string token, out VoiceEvent evt)

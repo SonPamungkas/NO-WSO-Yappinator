@@ -15,7 +15,7 @@ namespace WSOYappinator.Patches
             if (!GameManager.IsLocalAircraft(aircraft)) return;
 
             int ammo = Traverse.Create(__instance).Field("ammo").GetValue<int>();
-            if (ammo is > 1 and <= 5) Plugin.instance.TriggerVoiceline(VoiceEvent.noFlares, 10f);
+            if (ammo is > 1 and <= 5) Plugin.I.TriggerVoiceline(VoiceEvent.noFlares, 10f);
         }
     }
 }
