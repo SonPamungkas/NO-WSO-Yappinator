@@ -1,0 +1,851 @@
+Mono path[0] = 'C:/Program Files/Steam/steamapps/common/Nuclear Option/NuclearOption_Data/Managed'
+Mono config path = 'C:/Program Files/Steam/steamapps/common/Nuclear Option/MonoBleedingEdge/etc'
+Fallback handler could not load library C:/Program Files/Steam/steamapps/common/Nuclear Option/NuclearOption_Data/MonoBleedingEdge/data-0000020A18260100.dll
+Fallback handler could not load library C:/Program Files/Steam/steamapps/common/Nuclear Option/NuclearOption_Data/MonoBleedingEdge/data-0000020A1E1AF040.dll
+Input System module state changed to: Initialized.
+[PhysX] Initialized MultithreadedTaskDispatcher with 8 workers.
+Initialize engine version: 2022.3.62f2 (7670c08855a9)
+[Subsystems] Discovering subsystems at path C:/Program Files/Steam/steamapps/common/Nuclear Option/NuclearOption_Data/UnitySubsystems
+Forcing GfxDevice: Direct3D 12
+GfxDevice: creating device client; threaded=1; jobified=1
+d3d12: loaded!
+Direct3D:
+    Version:         Direct3D 12 [level 11.0]
+    Renderer:        NVIDIA GeForce GTX 950M (ID=0x139a)
+    Vendor:          NVIDIA
+    VRAM:            4047 MB
+    App VRAM Budget: 3440 MB
+    Driver:          32.0.15.8194
+Begin MonoManager ReloadAssembly
+- Loaded All Assemblies, in  0.209 seconds
+- Finished resetting the current domain, in  0.002 seconds
+[Message:   BepInEx] BepInEx 5.4.23.4 - NuclearOption (11/5/2025 8:33:36 PM)
+[Info   :   BepInEx] Running under Unity v2022.3.62.7762112
+[Info   :   BepInEx] CLR runtime version: 4.0.30319.42000
+[Info   :   BepInEx] Supports SRE: True
+[Info   :   BepInEx] System platform: Bits64, Windows
+[Message:   BepInEx] Preloader started
+[Info   :   BepInEx] Loaded 1 patcher method from [BepInEx.Preloader 5.4.23.4]
+[Info   :   BepInEx] 1 patcher plugin loaded
+[Info   :   BepInEx] Patching [UnityEngine.CoreModule] with [BepInEx.Chainloader]
+[Message:   BepInEx] Preloader finished
+[Message:   BepInEx] Chainloader ready
+[Message:   BepInEx] Chainloader started
+[Info   :   BepInEx] 2 plugins to load
+[Info   :   BepInEx] Loading [Configuration Manager 18.4.1]
+[Info   :   BepInEx] Loading [WSOYappinator 2.1.2]
+[Info   :WSOYappinator] Initializing set folder: C:\Program Files\Steam\steamapps\common\Nuclear Option\BepInEx\plugins\audio\Prez _Monarch
+[Info   :WSOYappinator] loaded 51 priorities from C:\Program Files\Steam\steamapps\common\Nuclear Option\BepInEx\plugins\audio\Prez _Monarch\eventPriorities.txt
+[Info   :WSOYappinator] Registering events for set [Prez _Monarch] (51 events)
+[Info   :WSOYappinator] Registered [beingJammed] (2 clips)
+[Info   :WSOYappinator] Registered [Death] (2 clips)
+[Info   :WSOYappinator] Registered [Eject] (2 clips)
+[Info   :WSOYappinator] Registered [engineDamage] (1 clips)
+[Info   :WSOYappinator] Registered [engineLost] (3 clips)
+[Info   :WSOYappinator] Registered [fireAGM] (3 clips)
+[Info   :WSOYappinator] Registered [fireAGR] (6 clips)
+[Info   :WSOYappinator] Registered [fireARM] (4 clips)
+[Info   :WSOYappinator] Registered [fireBomb] (4 clips)
+[Info   :WSOYappinator] Registered [fireCruise] (3 clips)
+[Info   :WSOYappinator] Registered [fireFox2] (3 clips)
+[Info   :WSOYappinator] Registered [fireFox3] (3 clips)
+[Info   :WSOYappinator] Registered [fireMissile] (3 clips)
+[Info   :WSOYappinator] Registered [fireNuclear] (4 clips)
+[Info   :WSOYappinator] Registered [FlightAssistOff] (2 clips)
+[Info   :WSOYappinator] Registered [fuelLow] (1 clips)
+[Info   :WSOYappinator] Registered [GearDown] (4 clips)
+[Info   :WSOYappinator] Registered [GearUp] (2 clips)
+[Info   :WSOYappinator] Registered [guns] (5 clips)
+[Info   :WSOYappinator] Registered [HitMarker] (17 clips)
+[Info   :WSOYappinator] Registered [killAircraft] (6 clips)
+[Info   :WSOYappinator] Registered [killGeneric] (12 clips)
+[Info   :WSOYappinator] Registered [onGLOC] (2 clips)
+[Info   :WSOYappinator] Registered [onSortieSuccess] (7 clips)
+[Info   :WSOYappinator] Registered [partDetach] (2 clips)
+[Info   :WSOYappinator] Registered [radarPingLocked] (3 clips)
+[Info   :WSOYappinator] Registered [radarPingNew] (5 clips)
+[Info   :WSOYappinator] Registered [Rearm] (1 clips)
+[Info   :WSOYappinator] Registered [RwrOff] (2 clips)
+[Info   :WSOYappinator] Registered [RwrOn] (4 clips)
+[Info   :WSOYappinator] Registered [RwrOnFox2] (3 clips)
+[Info   :WSOYappinator] Registered [Spawn] (5 clips)
+[Info   :WSOYappinator] Registered [takeDamage] (3 clips)
+[Info   :WSOYappinator] Registered [Touchdown] (4 clips)
+Fallback handler could not load library C:/Program Files/Steam/steamapps/common/Nuclear Option/NuclearOption_Data/MonoBleedingEdge/data-0000020B014CC530.dll
+[Info   :WSOYappinator] Mod loaded!
+[Message:   BepInEx] Chainloader startup complete
+<RI> Initializing input.
+Using Windows.Gaming.Input
+<RI> Input initialized.
+<RI> Initialized touch support.
+[PhysX] Initialized MultithreadedTaskDispatcher with 8 workers.
+UnloadTime: 1.392200 ms
+[MainMenu] RuntimeInitializeOnLoadMethod
+Command Line Args: 9
+  C:\Program Files\Steam\steamapps\common\Nuclear Option\NuclearOption.exe
+  -force-d3d12
+  -force-d3d11
+  -screen-width
+  1280
+  -screen-height
+  720
+  -screen-fullscreen
+  1
+Nuclear Option 0.32.69 Starting at 4/6/2026 3:22:02 PM UTC
+0.000: [QualityLevels] BeforeInit QualityLevel:High, LOD:2
+0.000: [QualityLevels] QualityLevel:High, LOD:2
+Setting Job worker Count to 4
+0.000: [SteamManager] [SideThread] Running CheckIdFile
+0.000: [SteamManager] [SideThread] File exists
+[SideThread] Running ConvertMissionToFolders
+0.000: [MainMenu] Waiting for Tasks
+[Debug  :   BepInEx] [UnityInput] Using LegacyInputSystem
+2.834: [ResourcesAsyncLoader] Loaded Encyclopedia, load:2623, setup:7
+5.417: [ResourcesAsyncLoader] Loaded GameAssets, load:2636, setup:0
+5.467: [ResourcesAsyncLoader] Loaded DebugUI, load:2648, setup:22
+5.484: [ResourcesAsyncLoader] Loaded NuclearOption.Networking.NetworkManagerNuclearOption, load:2668, setup:22
+5.517: [ResourcesAsyncLoader] Loaded SoundManager, load:2667, setup:39
+5.534: [ResourcesAsyncLoader] Loaded UnityEngine.GameObject, load:1275, setup:0.2213
+5.584: [ResourcesAsyncLoader] Loaded UnityEngine.GameObject, load:1319, setup:0.0947
+5.584: [MainMenu] All Task finished
+5.584: [SteamManager] Init As Client
+5.584: [SteamManager] CheckInit
+5.584: [SteamManager] ClientInit
+5.584: [SteamManager] ClientInit Success
+5.584: [SteamManager] DebugHooks
+Setting event system Send Navigation Events to True
+Sorting all Allocations
+5.584: [LocationCache] Clearing Addressable Location cache
+UnitRegistry.Reinitialize Called
+5.584: [GameResolution] ResetGameResolution
+5.584: [SteamManager] [Msg] Certificate expires in 39h52m at 1775632451 (current time 1775488925), will renew in 37h52m
+5.584: [SteamManager] [Warning] SDR network config fetch attempt #1 failed.  HTTP 504.  .  Trying again.
+6.510: [SteamManager] [Msg] Got SDR network config.  Loaded revision 1774928217 OK
+6.510: [SteamManager] [Msg] Performing ping measurement
+6.510: [SteamManager] [Msg] SDR RelayNetworkStatus:  avail=Attempting  config=OK  anyrelay=Attempting   (Performing ping measurement)
+6.510: [SteamManager] [Msg] AuthStatus (steamid:76561198409530798):  OK  (OK)
+6.945: [SteamManager] [Msg] L4S detection: no.  up_ecn1=dropped  down_dscp45=dropped
+6.945: [SteamManager] [Msg] We will send ECN=0 (ECN config value=-1)
+10.046: [SteamManager] [Msg] Ping measurement completed in 3.5s.  Relays: 23 valid, 0 great, 1 good+, 5 ok+, 5 ignored
+10.046: [SteamManager] [Msg] Ping location: sgp=56+5/57+5,maa2=87+8/88+5,hkg=89+8/88+5,bom2=106+10/105+5,tyo=125+12,dxb=227+22/132+5,syd=149+14/149+5,seo=162+16/155+12,par=201+20,fra=220+22/210+20,iad=/278+20,gru=400+40/394+20
+10.046: [SteamManager] [Msg] SDR RelayNetworkStatus:  avail=OK  config=OK  anyrelay=OK   (OK.  Relays: 23 valid, 0 great, 1 good+, 5 ok+, 5 ignored)
+Unloading 6 Unused Serialized files (Serialized files now loaded: 0)
+[PhysX] Initialized MultithreadedTaskDispatcher with 5 workers.
+UnloadTime: 8.424400 ms
+580 Subscribed Items
+Unloading 1898 unused Assets to reduce memory usage. Loaded Objects now: 67585.
+Total: 89.452700 ms (FindLiveObjects: 3.456700 ms CreateObjectMapping: 6.663000 ms MarkObjects: 78.240500 ms  DeleteObjects: 1.092100 ms)
+
+29.920: [MissionManager] AfterLoad for mission Altercation
+30.725: [MissionManager] Setting CurrentMission, old: new:Altercation
+Setting UDP socket
+30.725: [NetworkAuthenticatorNuclearOption] Loading BuildHash: 749532635
+30.725: [NetworkAuthenticatorNuclearOption] connection(LocalPipe) - JoinAs:Normal, BuildHash:749532635, SteamAuthToken Length:NULL Hash:NULL
+30.725: [NetworkAuthenticatorNuclearOption] connection(LocalPipe) - JoinAs:Normal, BuildHash:749532635, SteamAuthToken Length:NULL Hash:NULL
+30.725: [NetworkAuthenticatorNuclearOption] Accepting connection(LocalPipe), reason:UDP auth success
+30.725: [NetworkManagerNuclearOption] Client connected: connection(LocalPipe)
+30.725: [NetworkManagerNuclearOption] Player connected: connection(LocalPipe)
+Setting event system Send Navigation Events to True
+Sorting all Allocations
+30.725: [LocationCache] Clearing Addressable Location cache
+UnitRegistry.Reinitialize Called
+30.725: [GameResolution] ResetGameResolution
+30.725: [LoadingScreen] ShowLoadingScreen activeCount=0
+30.725: [MapLoader] Using Default scene (GameWorldPrefab,Terrain1)
+30.725: [MapLoader] Found GameWorldPrefab Terrain1
+30.725: [MapLoader] Loading GameWorld=Assets/Scenes/GameWorld/GameWorld.unity
+30.725: [MapLoader] Trying to load (BuiltinScene,Assets/Scenes/GameWorld/GameWorld.unity)
+30.725: [MapLoader] Start Load Assets/Scenes/GameWorld/GameWorld.unity
+Unloading 4 Unused Serialized files (Serialized files now loaded: 0)
+[PhysX] Initialized MultithreadedTaskDispatcher with 5 workers.
+UnloadTime: 26.206200 ms
+33.305: [LevelInfo] GenerateAirDensityChart
+33.305: [JobSharedFields] Allocating new Chunk for JobSharedFields, total KB:0
+Skipping JobPerf
+33.305: [MapLoader] Load Finished, active scene = Assets/Scenes/GameWorld/GameWorld.unity
+33.305: [MapLoader] Scene Load duration 2581.3564ms
+33.305: [MapLoader] Scene changed, settings up network objects
+33.305: [MapSettingsManager] Enabling Map=Terrain1
+33.305: [NetworkMap] Server Spawn scene objects
+33.305: [Airbase] RegisterAirbase North Boscali Airbase
+33.305: [Airbase] RegisterAirbase South Boscali General Aviation
+33.305: [Airbase] RegisterAirbase Vigil Cay Naval Airbase
+33.305: [Airbase] RegisterAirbase Agrapol Airbase
+33.305: [Airbase] RegisterAirbase Sandrift Airbase
+33.305: [Airbase] RegisterAirbase Maris Airport
+33.305: [Airbase] RegisterAirbase K92 Highway Strip
+33.305: [Airbase] RegisterAirbase Dustbowl Highway Strip
+33.305: [LevelInfo] ApplyMapSettings: Terrain1(Clone)
+33.305: [MapLoader] Prefab Load duration 281.2465ms
+33.305: [LoadingScreen] HideLoadingScreen activeCount=0
+33.305: [NetworkManagerNuclearOption] Server finished loading
+33.305: [NetworkManagerNuclearOption] Spawning Player object for host and connections
+33.305: [NetworkManagerNuclearOption] Spawning Normal Player for connection(LocalPipe)
+Unloading 12 unused Assets to reduce memory usage. Loaded Objects now: 138030.
+Total: 107.673000 ms (FindLiveObjects: 10.012900 ms CreateObjectMapping: 12.241200 ms MarkObjects: 85.143900 ms  DeleteObjects: 0.274800 ms)
+
+33.305: [MissionManager] StartMission
+33.305: [MissionManager] OnSceneLoaded for mission Altercation
+33.305: [Mission] Found Maris Airport in scene
+33.305: [Mission] Found Sandrift Airbase in scene
+33.305: [Mission] Found Agrapol Airbase in scene
+33.305: [Mission] Found Vigil Cay Naval Airbase in scene
+33.305: [Mission] Found South Boscali General Aviation in scene
+33.305: [Mission] Found North Boscali Airbase in scene
+33.305: [Mission] Found K92 Highway Strip in scene
+Adding airbase highwaystrip2 to BoscaliHQ
+33.305: [Mission] Found Dustbowl Highway Strip in scene
+Adding airbase highwaystrip1 to PrimevaHQ
+33.305: [Airbase] Adding Building [hangar, storage] (shelter1, 1) to airbase_desert1
+33.305: [Airbase] Adding Building [hangar, storage] (shelter1, 2) to airbase_desert1
+33.305: [Airbase] Adding Building [hangar, storage] (shelter1, 3) to airbase_desert1
+33.305: [Airbase] Adding Building [hangar, storage] (shelter1, 4) to airbase_desert1
+33.305: [Airbase] Adding Building [hangar, storage] (shelter1, 5) to airbase_mountains
+33.305: [Airbase] Adding Building [hangar, storage] (shelter1, 6) to airbase_mountains
+33.305: [Airbase] Adding Building [hangar, storage] (shelter1, 7) to airbase_mountains
+33.305: [Airbase] Adding Building [hangar, storage] (shelter1, 8) to airbase_mountains
+33.305: [Airbase] Adding Building [hangar, storage] (shelter1, 9) to airbase_city
+33.305: [Airbase] Adding Building [hangar, storage] (shelter1, 10) to airbase_city
+33.305: [Airbase] Adding Building [hangar, storage] (shelter1, 11) to airbase_city
+33.305: [Airbase] Adding Building [hangar, storage] (shelter1, 12) to airbase_city
+33.305: [Airbase] Adding Building [hangar, storage] (shelter1, 13) to airbase_city
+33.305: [Airbase] Adding Building [hangar, storage] (shelter1, 14) to airbase_boscali_north
+33.305: [Airbase] Adding Building [hangar, storage] (shelter1, 15) to airbase_boscali_north
+33.305: [Airbase] Adding Building [hangar, storage] (shelter1, 16) to airbase_boscali_north
+33.305: [Airbase] Adding Building [hangar] (hangar_med, 17) to airbase_mountains
+33.305: [Airbase] Adding Building [hangar] (hangar_med, 18) to airbase_mountains
+33.305: [Airbase] Adding Building [hangar] (hangar_med, 19) to airbase_mountains
+33.305: [Airbase] Adding Building [hangar] (hangar_med, 20) to airbase_mountains
+33.305: [Airbase] Adding Building [hangar] (hangar_med, 21) to airbase_city
+33.305: [Airbase] Adding Building [hangar] (hangar_med, 22) to airbase_city
+33.305: [Airbase] Adding Building [hangar] (hangar_med, 26) to airbase_boscali_north
+33.305: [Airbase] Adding Building [hangar] (revetment1, 32) to highwaystrip1
+33.305: [Airbase] Adding Building [hangar] (revetment1, 33) to highwaystrip2
+33.305: [Airbase] Adding Building [hangar] (revetment1, 36) to highwaystrip2
+33.305: [Airbase] Adding Building [hangar] (revetment1, 37) to airstrip_city2
+33.305: [Airbase] Adding Building [hangar] (revetment1, 38) to airstrip_city2
+33.305: [Airbase] Adding Building [hangar] (revetment1, 39) to airstrip_city2
+33.305: [Airbase] Adding Building [hangar] (revetment1, 40) to highwaystrip1
+33.305: [Airbase] Adding Building (controlTower1, 55) to airbase_boscali_north
+33.305: [Airbase] Adding Building (controlTower1, 56) to airbase_city
+33.305: [Airbase] Adding Building (controlTower1, 57) to airbase_mountains
+33.305: [Airbase] Adding Building (controlTower1, 58) to airbase_desert1
+33.305: [Airbase] Adding Building [hangar] (hangar_med, 64) to airbase_boscali_north
+33.305: [Airbase] Adding Building [hangar] (hangar_med, 65) to airbase_city
+33.305: [Airbase] Adding Building [hangar] (hangar_med, 66) to airbase_mountains
+33.305: [Airbase] Adding Building [hangar] (hangar_med, 67) to airstrip_city2
+33.305: [Airbase] Adding Building [hangar, storage] (shelter1, 68) to airbase_boscali_north
+33.305: [Airbase] Adding Building [hangar, storage] (shelter1, 69) to airbase_city
+33.305: [Airbase] Adding Building [hangar, storage] (shelter1, 70) to airbase_mountains
+33.305: [Airbase] Adding Building [hangar, storage] (shelter1, 71) to airbase_mountains
+33.305: [Airbase] Adding Building [hangar, storage] (shelter1, 72) to airbase_mountains
+33.305: [Airbase] Adding Building (controlTower1, 74) to navalbase
+33.305: [Airbase] Adding Building [hangar] (hangar_med, 75) to navalbase
+33.305: [Airbase] Adding Building [hangar] (hangar_med, 76) to navalbase
+33.305: [Airbase] Adding Building [hangar, storage] (shelter1, 77) to navalbase
+33.305: [Airbase] Adding Building [hangar, storage] (shelter1, 78) to navalbase
+33.305: [Airbase] Adding Building [hangar, storage] (shelter1, 79) to navalbase
+33.305: [Airbase] Adding Building [hangar, storage] (shelter1, 80) to navalbase
+33.305: [Airbase] Adding Building [hangar] (Helipad, 84) to highwaystrip1
+33.305: [Airbase] Adding Building [hangar] (Helipad, 85) to highwaystrip2
+33.305: [Airbase] Adding Building [hangar] (Helipad, 86) to highwaystrip2
+33.305: [Airbase] Adding Building [hangar] (Helipad, 87) to airbase_city
+33.305: [Airbase] Adding Building [hangar] (Helipad, 88) to airbase_city
+33.305: [Airbase] Adding Building [hangar] (Helipad, 89) to airbase_city
+33.305: [Airbase] Adding Building [hangar] (Helipad, 90) to airbase_mountains
+33.305: [Airbase] Adding Building [hangar] (Helipad, 91) to airbase_mountains
+33.305: [Airbase] Adding Building [hangar] (Helipad, 92) to airbase_mountains
+33.305: [Airbase] Adding Building [hangar] (Helipad, 93) to highwaystrip1
+33.305: [Airbase] Adding Building [hangar] (Helipad, 94) to airbase_boscali_north
+33.305: [Airbase] Adding Building [hangar] (Helipad, 95) to airbase_boscali_north
+33.305: [Airbase] Adding Building [hangar] (Helipad, 96) to navalbase
+33.305: [Airbase] Adding Building [hangar] (Helipad, 97) to navalbase
+33.305: [Airbase] Adding Building [hangar] (Helipad, 98) to navalbase
+33.305: [Airbase] Adding Building [hangar] (Helipad, 99) to airbase_desert1
+33.305: [Airbase] Adding Building [hangar] (Helipad, 100) to airbase_desert1
+33.305: [Airbase] Adding Building [hangar] (Helipad, 101) to airstrip_city2
+33.305: [Airbase] Adding Building [hangar] (Helipad, 102) to airstrip_city2
+33.305: [Airbase] Adding Building [storage] (ammunitionBunker, 103) to airbase_desert1
+33.305: [Airbase] Adding Building [storage] (ammunitionBunker, 104) to airbase_desert1
+33.305: [Airbase] Adding Building [storage] (ammunitionBunker, 105) to airbase_desert1
+33.305: [Airbase] Adding Building [storage] (ammunitionBunker, 106) to airbase_mountains
+33.305: [Airbase] Adding Building [storage] (ammunitionBunker, 107) to airbase_mountains
+33.305: [Airbase] Adding Building [storage] (ammunitionBunker, 108) to airbase_mountains
+33.305: [Airbase] Adding Building [storage] (ammunitionBunker, 109) to airbase_mountains
+33.305: [Airbase] Adding Building [storage] (ammunitionBunker, 110) to airbase_city
+33.305: [Airbase] Adding Building [storage] (ammunitionBunker, 111) to airbase_city
+33.305: [Airbase] Adding Building [storage] (ammunitionBunker, 112) to airbase_city
+33.305: [Airbase] Adding Building [storage] (ammunitionBunker, 113) to airbase_boscali_north
+33.305: [Airbase] Adding Building [storage] (ammunitionBunker, 114) to airbase_boscali_north
+33.305: [Airbase] Adding Building [storage] (ammunitionBunker, 115) to airbase_boscali_north
+33.305: [Airbase] Adding Building [storage] (ammunitionBunker, 116) to navalbase
+33.305: [Airbase] Adding Building [storage] (ammunitionBunker, 117) to navalbase
+33.305: [Airbase] Adding Building [storage] (ammunitionBunker, 118) to navalbase
+33.305: [Airbase] Adding Building [storage] (ammunitionBunker, 119) to highwaystrip2
+33.305: [Airbase] Adding Building [storage] (ammunitionBunker, 120) to highwaystrip1
+33.305: [Airbase] Adding Building [storage] (ammunitionBunker, 121) to airstrip_city2
+33.305: [GroundVehicleFields] Allocating new Chunk for GroundVehicleFields, total KB:62
+33.305: [ControlSurfaceFields] Allocating new Chunk for ControlSurfaceFields, total KB:42
+33.305: [Unit] Setting VL-49 Tarantula physics to Complex
+33.305: [AeroPartFields] Allocating new Chunk for AeroPartFields, total KB:34
+33.305: [Unit] Setting VL-49 Tarantula physics to Complex
+33.305: [Unit] Setting CI-22 Cricket physics to Complex
+33.305: [Unit] Setting CI-22 Cricket physics to Complex
+33.305: [Unit] Setting CI-22 Cricket physics to Complex
+33.305: [Unit] Setting CI-22 Cricket physics to Complex
+33.305: [NetworkMission] Setting state to Unloaded -> Running
+33.305: [NetworkManagerNuclearOption] setting playerStartingRank for Player(□□□□,netId=141) to 0
+33.305: [Player] Player rank up old=0 new=0
+34.644: [IndexLink] Allocating new Chunk for IndexLink, total KB:1
+34.644: [Int32] Allocating new Chunk for Int32, total KB:1
+34.644: [IndexLink] Allocating new Chunk for IndexLink, total KB:2
+34.644: [Int32] Allocating new Chunk for Int32, total KB:2
+36.526: [FactionHQ] New Player(□□□□,netId=141) joined Boscali
+Setting Allocation Display Visibility to False
+580 Subscribed Items
+38.612: [Unit] Setting  physics to Complex
+38.612: [ModLoader] First load for C:\Program Files\Steam\steamapps\workshop\content\2168680\3539079505
+SPLIT 4 WARHEADS BETWEEN : 1 AIRBASES
+SPLIT 4 WARHEADS BETWEEN : 1 AIRBASES
+40.548: [Player] Purchasing Airframe COIN (UnityEngine.GameObject)
+41.266: [Player] SetAircraft id=228 Identity[248, COIN]
+[Info   :WSOYappinator] [DIAGNOSTIC] --- Deep Scan for □□□□ [CI-22 Cricket] ---
+[Info   :WSOYappinator] [DIAGNOSTIC] Components found: Transform, NetworkIdentity, Rigidbody, AudioSource, Aircraft, VaporEffect, SetGlobalParticles, FlareEjector, MeshCollider, MeshFilter, MeshRenderer, TurbineEngine, TargetDetector, LODGroup, AeroPart, FuelTank, AircraftNetworkTransform, PowerSupply, Transmission, NavLights, ConstantSpeedProp, PropStrikeDetector, AutopilotPlane, ControlsFilter, WeaponManager, BoxCollider, Animator, SkinnedMeshRenderer, LandingGear, ParticleSystemRenderer, ParticleSystem, Cockpit, Light, UniversalAdditionalLightData, TargetCam, LaserDesignator, CapsuleCollider, Pilot, Canopy, CockpitWarningLights, ControlSurface, HighLiftDevice
+[Info   :WSOYappinator] [DIAGNOSTIC] Fields on Aircraft:
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: playerRef (PlayerRef)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: loadout (Loadout)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: spawningHangar (NetworkBehaviorSyncvar)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: startingVelocity (Vector3)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: LiveryKey (LiveryKey)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: sortieScore (Single)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: countermeasureTrigger (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: fuelLevel (Single)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: Ignition (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: gearDeployed (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: EOTS (TargetDetector)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: pilots (Pilot[])
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: targetCam (TargetCam)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: weaponManager (WeaponManager)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: countermeasureManager (CountermeasureManager)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: scrapeSound (AudioClip)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: cockpit (UnitPart)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: controlsFilter (ControlsFilter)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: relaxedStabilityController (RelaxedStabilityController)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: flightAssist (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: defaultRadar (TargetDetector)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: powerSupply (PowerSupply)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: canopies (Canopy[])
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: dopplerSounds (List`1)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: cockpitRenderers (Renderer[])
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: exteriorRenderers (Renderer[])
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: sparksEmitter (ParticleSystem)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: groundEquipment (GameObject[])
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: autopilot (Autopilot)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: gearState (GearState)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: accel (Vector3)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: velocityPrev (Vector3)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: windVelocity (Vector3)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: gForce (Single)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: simplePhysics (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: skill (Single)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: bravery (Single)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: statusDisplay (StatusDisplay)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: controlInputs (ControlInputs)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: knownRadarSources (List`1)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: targetDetectors (List`1)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: engineStates (List`1)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: engines (List`1)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: fuelTanks (List`1)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: missileWarning (MissileWarning)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: laserDesignator (LaserDesignator)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: needsFuel (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: ejected (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: airborne (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: jammingIntensity (Single)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: fuelCapacity (Single)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: partsWithAero (List`1)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: partDamageTracker (PartDamageTracker)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: emitParams (EmitParams)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: scrapeSource (AudioSource)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: smoothingVel (Vector3)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: rotationSmoothingVel (Vector3)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: spawnedInPosition (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: partChecker (PartChecker)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: liveryBehaviour (LiveryBehaviour)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: CoMDebug (GameObject)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: debugControlInputsDisplay (DebugControlInputsDisplay)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: controlSurfaces (List`1)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: slungUnit (Unit)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: onLoadoutChanged (Action)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: onSpawnedInPosition (Action)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: onEject (Action)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: OnTouchdown (Action)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: onSortieSuccessful (Action`1)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: onSetGear (Action`1)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: onSetFlightAssist (Action`1)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: onShake (Action`1)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: onRadarWarning (Action`1)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: OnRearm (Action`1)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: navLights (NavLights)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: inputIntervalCounter (Int32)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: persistentID (PersistentID)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: unitName (String)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: UniqueName (String)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: startPosition (GlobalPosition)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: startRotation (Quaternion)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: HQ (NetworkBehaviorSyncvar)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: disabled (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: unitState (UnitState)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: MapUniqueName (String)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: MapHQ (FactionHQ)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: MapAirbase (Airbase)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: weaponStations (List`1)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: maxRadius (Single)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: obstacleTop (Single)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: displayDetail (Single)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: visibility (Single)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: cockpitViewPoint (Transform)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: definition (UnitDefinition)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: damageCredit (Dictionary`2)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: partLookup (List`1)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: damageables (List`1)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: networked (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: airDensity (Single)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: radarAlt (Single)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: speed (Single)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: lastAltitudeCheck (Single)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: RCS (Single)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: hit (RaycastHit)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: radar (TargetDetector)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: spawnedEffects (List`1)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: _nextSyncTime (Double)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: SyncSettings (SyncSettings)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: syncObjects (List`1)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Field: _deserializeMask (UInt64)
+[Info   :WSOYappinator] [DIAGNOSTIC] Properties on Aircraft:
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: Player (Player)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: definition (AircraftDefinition)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: NetworkplayerRef (PlayerRef)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: Networkloadout (Loadout)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: NetworkspawningHangar (Hangar)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: NetworkstartingVelocity (Vector3)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: NetworkLiveryKey (LiveryKey)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: NetworksortieScore (Single)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: NetworkcountermeasureTrigger (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: NetworkfuelLevel (Single)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: NetworkIgnition (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: NetworkgearDeployed (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: Editor_HQ (FactionHQ)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: SavedUnit (SavedUnit)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: BuiltIn (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: IsCustom (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: rb (Rigidbody)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: remoteSim (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: LocalSim (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: CaptureStrength (Single)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: CaptureDefense (Single)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: ObjectType (ObjectType)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: NetworkpersistentID (PersistentID)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: NetworkunitName (String)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: NetworkUniqueName (String)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: NetworkstartPosition (GlobalPosition)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: NetworkstartRotation (Quaternion)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: NetworkHQ (FactionHQ)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: Networkdisabled (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: NetworkunitState (UnitState)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: NetworkremoteWeaponStates (WeaponMask)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: IsServer (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: IsClient (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: IsLocalClient (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: IsHost (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: IsLocalPlayer (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: IsServerOnly (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: IsClientOnly (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: HasAuthority (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: NetId (UInt32)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: Server (NetworkServer)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: ServerObjectManager (ServerObjectManager)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: Client (NetworkClient)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: ClientObjectManager (ClientObjectManager)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: Owner (INetworkPlayer)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: World (NetworkWorld)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: NetworkTime (NetworkTime)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: BehaviourId (Id)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: SyncVarDirtyBits (UInt64)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: AnySyncObjectDirty (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: Identity (NetworkIdentity)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: ComponentIndex (Int32)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: destroyCancellationToken (CancellationToken)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: useGUILayout (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: enabled (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: isActiveAndEnabled (Boolean)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: transform (Transform)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: gameObject (GameObject)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: tag (String)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: name (String)
+[Info   :WSOYappinator] [DIAGNOSTIC]   Property: hideFlags (HideFlags)
+[Info   :WSOYappinator] [DIAGNOSTIC] --- Scan Complete ---
+[Debug  :WSOYappinator] [DEBUG] Muting voiceline: Pilot count is 1 (Imaginary Copilot: False)
+[Debug  :WSOYappinator] Played [Spawn] (effective Spawn, actual Spawn): z _Monarch\Spawn  (3).ogg (chance 100%, pri 25, currPri-> 25, cd 5.50s).
+41.266: [Unit] Setting □□□□ [CI-22 Cricket] physics to Complex
+[Debug  :WSOYappinator] Cooldown for [FlightAssistOn] (effPri 5 <= currPri 25).
+[Debug  :WSOYappinator] Cooldown for [GearDown] (effPri 10 <= currPri 25).
+[Info   :WSOYappinator] MWS FOUND on □□□□ [CI-22 Cricket]! Subscribing...
+Setting Allocation Display Visibility to True
+Initializing TrackIR with app ID 8285
+TrackIR Enhanced API not available.
+TrackIR module not found
+Highlighting Player's aircraft icon
+111.322: [NetworkManagerNuclearOption] Trying to load 'Assets/Scenes/MainMenu/MainMenu.unity'
+111.322: [NetworkManagerNuclearOption] Start load scene 'Assets/Scenes/MainMenu/MainMenu.unity'. Old Scene = GameWorld
+111.322: [MissionManager] UnloadMission
+111.322: [NetworkMission] Clear Mission
+111.322: [NetworkMission] Mission already equal to NULL, skipping set
+111.322: [MissionManager] Setting CurrentMission, old:Altercation new:NULL
+111.322: [LoadingScreen] ShowLoadingScreen activeCount=0
+111.322: [NetworkManagerNuclearOption] Client disconnected HostModeStopped
+111.322: [NetworkAuthenticatorNuclearOption] Handling client disconnect, CancelSource:False, HasTicket:False
+111.322: [Airbase] UnregisterAirbase Dustbowl Highway Strip
+111.322: [Airbase] UnregisterAirbase K92 Highway Strip
+111.322: [Airbase] UnregisterAirbase Maris Airport
+111.322: [Airbase] UnregisterAirbase Sandrift Airbase
+Unloading 3 Unused Serialized files (Serialized files now loaded: 3)
+111.322: [Airbase] UnregisterAirbase Agrapol Airbase
+111.322: [Airbase] UnregisterAirbase Vigil Cay Naval Airbase
+111.322: [Airbase] UnregisterAirbase South Boscali General Aviation
+111.322: [Airbase] UnregisterAirbase North Boscali Airbase
+NullReferenceException
+  at (wrapper managed-to-native) UnityEngine.Component.get_transform(UnityEngine.Component)
+  at WSOYappinator.Plugin+<>c__DisplayClass43_0.<SubscribeAircraftEvents>b__12 () [0x0017e] in <cdd512ad7082401090d148cfef9e27ef>:0 
+  at WSOYappinator.Plugin.Update () [0x0004f] in <cdd512ad7082401090d148cfef9e27ef>:0 
+
+NullReferenceException
+  at (wrapper managed-to-native) UnityEngine.Component.get_transform(UnityEngine.Component)
+  at WSOYappinator.Plugin+<>c__DisplayClass43_0.<SubscribeAircraftEvents>b__12 () [0x0017e] in <cdd512ad7082401090d148cfef9e27ef>:0 
+  at WSOYappinator.Plugin.Update () [0x0004f] in <cdd512ad7082401090d148cfef9e27ef>:0 
+
+111.463: [MissionManager] OnDestroy
+111.463: [MissionManager] Client stop
+111.463: [MissionManager] UnloadMission
+111.463: [NetworkMission] Clear Mission
+111.463: [NetworkMission] Mission already equal to NULL, skipping set
+111.463: [MissionManager] Setting CurrentMission, old:NULL new:NULL
+[PhysX] Initialized MultithreadedTaskDispatcher with 5 workers.
+UnloadTime: 40.483400 ms
+Sorting all Allocations
+111.463: [LocationCache] Clearing Addressable Location cache
+UnitRegistry.Reinitialize Called
+Setting event system Send Navigation Events to True
+Sorting all Allocations
+111.463: [LocationCache] Clearing Addressable Location cache
+UnitRegistry.Reinitialize Called
+111.463: [GameResolution] ResetGameResolution
+Unloading 47280 unused Assets to reduce memory usage. Loaded Objects now: 71093.
+Total: 120.801200 ms (FindLiveObjects: 7.426600 ms CreateObjectMapping: 12.869400 ms MarkObjects: 70.916800 ms  DeleteObjects: 29.588000 ms)
+
+Unloading 0 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 0 unused Assets to reduce memory usage. Loaded Objects now: 71077.
+Total: 87.586900 ms (FindLiveObjects: 5.034200 ms CreateObjectMapping: 6.564000 ms MarkObjects: 75.857900 ms  DeleteObjects: 0.130600 ms)
+
+MonoHeap: 105 / 129 MB (BEFORE CLEANUP)
+MonoHeap: 78 / 129 MB (After CLEANUP)
+111.702: [LoadingScreen] HideLoadingScreen activeCount=0
+111.702: [NetworkManagerNuclearOption] Finished load scene 'Assets/Scenes/MainMenu/MainMenu.unity'
+[MainMenu] Application_quitting
+114.410: [SteamManager] Shutdown
+114.410: [SteamManager] [Msg] Shutting down low level socket/threading support.
+Input System module state changed to: ShutdownInProgress.
+Input System polling thread exited.
+Input System module state changed to: Shutdown.
+Memory Statistics:
+[ALLOC_TEMP_TLS] TLS Allocator
+  StackAllocators : 
+    [ALLOC_TEMP_MAIN]
+      Peak usage frame count: [2.0 KB-4.0 KB]: 1532 frames, [4.0 KB-8.0 KB]: 25 frames, [8.0 KB-16.0 KB]: 164 frames, [16.0 KB-32.0 KB]: 74 frames, [32.0 KB-64.0 KB]: 54 frames, [64.0 KB-128.0 KB]: 2394 frames, [128.0 KB-256.0 KB]: 8 frames, [256.0 KB-0.5 MB]: 6 frames, [0.5 MB-1.0 MB]: 5 frames, [1.0 MB-2.0 MB]: 1 frames, [4.0 MB-8.0 MB]: 6 frames
+      Initial Block Size 4.0 MB
+      Current Block Size 8.0 MB
+      Peak Allocated Bytes 8.0 MB
+      Overflow Count 147848
+    [ALLOC_TEMP_Loading.AsyncRead]
+      Initial Block Size 64.0 KB
+      Current Block Size 108.0 KB
+      Peak Allocated Bytes 105.2 KB
+      Overflow Count 0
+    [ALLOC_TEMP_Loading.PreloadManager]
+      Initial Block Size 256.0 KB
+      Current Block Size 0.5 MB
+      Peak Allocated Bytes 471.3 KB
+      Overflow Count 33367
+    [ALLOC_TEMP_Background Job.Worker 8]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_Job.Worker 6]
+      Initial Block Size 256.0 KB
+      Current Block Size 256.0 KB
+      Peak Allocated Bytes 55 B
+      Overflow Count 0
+    [ALLOC_TEMP_Job.Worker 0]
+      Initial Block Size 256.0 KB
+      Current Block Size 500.0 KB
+      Peak Allocated Bytes 498.3 KB
+      Overflow Count 39
+    [ALLOC_TEMP_Background Job.Worker 10]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_Background Job.Worker 9]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_Job.Worker 5]
+      Initial Block Size 256.0 KB
+      Current Block Size 256.0 KB
+      Peak Allocated Bytes 55 B
+      Overflow Count 0
+    [ALLOC_TEMP_Background Job.Worker 14]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_Background Job.Worker 6]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_Job.Worker 4]
+      Initial Block Size 256.0 KB
+      Current Block Size 256.0 KB
+      Peak Allocated Bytes 56 B
+      Overflow Count 0
+    [ALLOC_TEMP_Job.Worker 3]
+      Initial Block Size 256.0 KB
+      Current Block Size 0.5 MB
+      Peak Allocated Bytes 508.8 KB
+      Overflow Count 68
+    [ALLOC_TEMP_Background Job.Worker 12]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_EnlightenWorker] x 8
+      Initial Block Size 64.0 KB
+      Current Block Size 64.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_Background Job.Worker 15]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_Background Job.Worker 1]
+      Initial Block Size 32.0 KB
+      Current Block Size 36.0 KB
+      Peak Allocated Bytes 32.0 KB
+      Overflow Count 0
+    [ALLOC_TEMP_Background Job.Worker 2]
+      Initial Block Size 32.0 KB
+      Current Block Size 52.0 KB
+      Peak Allocated Bytes 49.2 KB
+      Overflow Count 0
+    [ALLOC_TEMP_Background Job.Worker 7]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_UnityGfxDeviceWorker]
+      Initial Block Size 256.0 KB
+      Current Block Size 256.0 KB
+      Peak Allocated Bytes 16.0 KB
+      Overflow Count 0
+    [ALLOC_TEMP_AssetGarbageCollectorHelper] x 7
+      Initial Block Size 64.0 KB
+      Current Block Size 64.0 KB
+      Peak Allocated Bytes 138 B
+      Overflow Count 0
+    [ALLOC_TEMP_Background Job.Worker 5]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_Background Job.Worker 13]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_Job.Worker 1]
+      Initial Block Size 256.0 KB
+      Current Block Size 504.0 KB
+      Peak Allocated Bytes 499.3 KB
+      Overflow Count 60
+    [ALLOC_TEMP_Job.Worker 2]
+      Initial Block Size 256.0 KB
+      Current Block Size 0.5 MB
+      Peak Allocated Bytes 509.3 KB
+      Overflow Count 58
+    [ALLOC_TEMP_Background Job.Worker 3]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_Background Job.Worker 11]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_Background Job.Worker 0]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_HIDInput]
+      Initial Block Size 64.0 KB
+      Current Block Size 64.0 KB
+      Peak Allocated Bytes 10.8 KB
+      Overflow Count 0
+    [ALLOC_TEMP_D3D12 Submission Thread]
+      Initial Block Size 64.0 KB
+      Current Block Size 64.0 KB
+      Peak Allocated Bytes 28.4 KB
+      Overflow Count 0
+    [ALLOC_TEMP_Background Job.Worker 4]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_BatchDeleteObjects]
+      Initial Block Size 64.0 KB
+      Current Block Size 64.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+[ALLOC_DEFAULT] Dual Thread Allocator
+  Peak main deferred allocation count 10694
+    [ALLOC_BUCKET]
+      Large Block size 4.0 MB
+      Used Block count 1
+      Peak Allocated bytes 4.0 MB
+      Failed Allocations. Bucket layout:
+        16B: 75 Subsections = 76800 buckets. Failed count: 699339
+        32B: 42 Subsections = 21504 buckets. Failed count: 882904
+        48B: 30 Subsections = 10240 buckets. Failed count: 297197
+        64B: 21 Subsections = 5376 buckets. Failed count: 90016
+        80B: 41 Subsections = 8396 buckets. Failed count: 53487
+        96B: 17 Subsections = 2901 buckets. Failed count: 136996
+        112B: 22 Subsections = 3218 buckets. Failed count: 28017
+        128B: 8 Subsections = 1024 buckets. Failed count: 78508
+    [ALLOC_DEFAULT_MAIN]
+      Peak usage frame count: [64.0 MB-128.0 MB]: 2073 frames, [128.0 MB-256.0 MB]: 2196 frames
+      Requested Block Size 16.0 MB
+      Peak Block count 9
+      Peak Allocated memory 130.2 MB
+      Peak Large allocation bytes 38.4 MB
+    [ALLOC_DEFAULT_THREAD]
+      Peak usage frame count: [32.0 MB-64.0 MB]: 8 frames, [64.0 MB-128.0 MB]: 1325 frames, [128.0 MB-256.0 MB]: 212 frames, [256.0 MB-0.50 GB]: 2724 frames
+      Requested Block Size 16.0 MB
+      Peak Block count 21
+      Peak Allocated memory 399.0 MB
+      Peak Large allocation bytes 192.9 MB
+[ALLOC_TEMP_JOB_1_FRAME]
+  Initial Block Size 2.0 MB
+  Used Block Count 0
+  Overflow Count (too large) 0
+  Overflow Count (full) 0
+[ALLOC_TEMP_JOB_2_FRAMES]
+  Initial Block Size 2.0 MB
+  Used Block Count 0
+  Overflow Count (too large) 0
+  Overflow Count (full) 0
+[ALLOC_TEMP_JOB_4_FRAMES (JobTemp)]
+  Initial Block Size 2.0 MB
+  Used Block Count 1
+  Overflow Count (too large) 3
+  Overflow Count (full) 0
+[ALLOC_TEMP_JOB_ASYNC (Background)]
+  Initial Block Size 1.0 MB
+  Used Block Count 1
+  Overflow Count (too large) 1
+  Overflow Count (full) 0
+[ALLOC_GFX] Dual Thread Allocator
+  Peak main deferred allocation count 16
+    [ALLOC_BUCKET]
+      Large Block size 4.0 MB
+      Used Block count 1
+      Peak Allocated bytes 4.0 MB
+      Failed Allocations. Bucket layout:
+        16B: 75 Subsections = 76800 buckets. Failed count: 699339
+        32B: 42 Subsections = 21504 buckets. Failed count: 882904
+        48B: 30 Subsections = 10240 buckets. Failed count: 297197
+        64B: 21 Subsections = 5376 buckets. Failed count: 90016
+        80B: 41 Subsections = 8396 buckets. Failed count: 53487
+        96B: 17 Subsections = 2901 buckets. Failed count: 136996
+        112B: 22 Subsections = 3218 buckets. Failed count: 28017
+        128B: 8 Subsections = 1024 buckets. Failed count: 78508
+    [ALLOC_GFX_MAIN]
+      Peak usage frame count: [1.0 MB-2.0 MB]: 3729 frames, [2.0 MB-4.0 MB]: 19 frames, [4.0 MB-8.0 MB]: 521 frames
+      Requested Block Size 16.0 MB
+      Peak Block count 1
+      Peak Allocated memory 5.5 MB
+      Peak Large allocation bytes 0 B
+    [ALLOC_GFX_THREAD]
+      Peak usage frame count: [16.0 MB-32.0 MB]: 1480 frames, [32.0 MB-64.0 MB]: 3 frames, [64.0 MB-128.0 MB]: 2786 frames
+      Requested Block Size 16.0 MB
+      Peak Block count 3
+      Peak Allocated memory 76.6 MB
+      Peak Large allocation bytes 32.0 MB
+[ALLOC_CACHEOBJECTS] Dual Thread Allocator
+  Peak main deferred allocation count 80
+    [ALLOC_BUCKET]
+      Large Block size 4.0 MB
+      Used Block count 1
+      Peak Allocated bytes 4.0 MB
+      Failed Allocations. Bucket layout:
+        16B: 75 Subsections = 76800 buckets. Failed count: 699339
+        32B: 42 Subsections = 21504 buckets. Failed count: 882904
+        48B: 30 Subsections = 10240 buckets. Failed count: 297197
+        64B: 21 Subsections = 5376 buckets. Failed count: 90016
+        80B: 41 Subsections = 8396 buckets. Failed count: 53487
+        96B: 17 Subsections = 2901 buckets. Failed count: 136996
+        112B: 22 Subsections = 3218 buckets. Failed count: 28017
+        128B: 8 Subsections = 1024 buckets. Failed count: 78508
+    [ALLOC_CACHEOBJECTS_MAIN]
+      Peak usage frame count: [16.0 MB-32.0 MB]: 4269 frames
+      Requested Block Size 4.0 MB
+      Peak Block count 8
+      Peak Allocated memory 31.4 MB
+      Peak Large allocation bytes 9.6 MB
+    [ALLOC_CACHEOBJECTS_THREAD]
+      Peak usage frame count: [128.0 MB-256.0 MB]: 3888 frames, [256.0 MB-0.50 GB]: 381 frames
+      Requested Block Size 4.0 MB
+      Peak Block count 80
+      Peak Allocated memory 434.8 MB
+      Peak Large allocation bytes 190.5 MB
+[ALLOC_TYPETREE] Dual Thread Allocator
+  Peak main deferred allocation count 1
+    [ALLOC_BUCKET]
+      Large Block size 4.0 MB
+      Used Block count 1
+      Peak Allocated bytes 4.0 MB
+      Failed Allocations. Bucket layout:
+        16B: 75 Subsections = 76800 buckets. Failed count: 699339
+        32B: 42 Subsections = 21504 buckets. Failed count: 882904
+        48B: 30 Subsections = 10240 buckets. Failed count: 297197
+        64B: 21 Subsections = 5376 buckets. Failed count: 90016
+        80B: 41 Subsections = 8396 buckets. Failed count: 53487
+        96B: 17 Subsections = 2901 buckets. Failed count: 136996
+        112B: 22 Subsections = 3218 buckets. Failed count: 28017
+        128B: 8 Subsections = 1024 buckets. Failed count: 78508
+    [ALLOC_TYPETREE_MAIN]
+      Peak usage frame count: [4.0 KB-8.0 KB]: 1164 frames, [8.0 KB-16.0 KB]: 108 frames, [32.0 KB-64.0 KB]: 2997 frames
+      Requested Block Size 2.0 MB
+      Peak Block count 1
+      Peak Allocated memory 59.3 KB
+      Peak Large allocation bytes 0 B
+    [ALLOC_TYPETREE_THREAD]
+      Peak usage frame count: [256.0 KB-0.5 MB]: 1717 frames, [0.5 MB-1.0 MB]: 2552 frames
+      Requested Block Size 2.0 MB
+      Peak Block count 1
+      Peak Allocated memory 0.5 MB
+      Peak Large allocation bytes 0 B
