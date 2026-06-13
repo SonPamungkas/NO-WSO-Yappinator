@@ -40,6 +40,8 @@ namespace WSOYappinator
         private readonly Dictionary<string, ConfigEntry<bool>> _aircraftToggles = new Dictionary<string, ConfigEntry<bool>>();
         private ConfigEntry<bool> RefreshAircraftList;
         private ConfigEntry<bool> ImaginaryCopilot;
+        private ConfigEntry<bool> RandomVoicepackOnSpawn;
+        private readonly Dictionary<string, ConfigEntry<string>> _aircraftVoicepacks = new Dictionary<string, ConfigEntry<string>>();
         private int _cachedCrewCapacity = 0;
 
         public Dictionary<VoiceEvent, int> eventPriorities = new Dictionary<VoiceEvent, int>();
@@ -71,6 +73,7 @@ namespace WSOYappinator
             VerboseLogs = Config.Bind("General", "Verbose Logs", false, "enable verbose logs");
 
             ImaginaryCopilot = Config.Bind("General", "Imaginary copilot", false, "Enable the mod even if the aircraft has 1 or fewer crew members (for single-seat or unmanned aircraft).");
+            RandomVoicepackOnSpawn = Config.Bind("General", "Random Voicepack On Spawn", false, "Toggle for switching to a different voicepack every time we spawn in.");
 
             RefreshAircraftList = Config.Bind("General", "Scan for Aircraft", false,
                 new ConfigDescription("Click to re-scan for aircraft prefabs. Useful if you've added new aircraft mods without restarting.",
@@ -99,77 +102,40 @@ namespace WSOYappinator
 
             SelectedSet.SettingChanged += (_, __) =>
             {
-                Log.LogInfo($"Voiceline Set to [{SelectedSet.Value}]");
-                InitializeSet();
+                Log.LogInfo($"Global Voiceline Set changed to [{SelectedSet.Value}]");
+                ReloadCurrentVoicepack();
             };
+            RandomVoicepackOnSpawn.SettingChanged += (_, __) => ReloadCurrentVoicepack();
 
             InitializeSet();
 
             harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
             harmony.PatchAll();
             SceneManager.activeSceneChanged += OnActiveSceneChanged;
+            
+            StartCoroutine(InitConfigRoutine());
+            
             Log.LogInfo($"Mod loaded!");
         }
-        bool inGameWorld;
-        private void Update()
+
+        private System.Collections.IEnumerator InitConfigRoutine()
         {
-            if (!EnableMod.Value || !inGameWorld) return;
+            yield return new UnityEngine.WaitForSecondsRealtime(5f);
+            DiscoverAircraftAndBindConfig();
+        }
+        bool inGameWorld;
 
-            GameManager.GetLocalAircraft(out Aircraft current);
-            UpdateMws(current);
-            if (ReferenceEquals(current, _ac)) return;
-
-            _unsubscribeAcEvents?.Invoke();
-            _unsubscribeAcEvents = null;
-            _ac = current;
-            UnsubscribeMws();
-
-            if (_ac != null)
+        private System.Collections.IEnumerator MwsDiscoveryRoutine(Aircraft ac)
+        {
+            while (ac != null && _currentMws == null && ReferenceEquals(ac, _ac))
             {
-                _unsubscribeAcEvents = SubscribeAircraftEvents(_ac);
-                Log.LogDebug($"Subscribed to aircraft {_ac.unitName} ");
-            }
-            else
-            {
-                Log.LogDebug($"No local aircraft. unsubscribed.");
+                UpdateMws(ac);
+                if (_currentMws != null) yield break;
+                yield return new UnityEngine.WaitForSeconds(1f);
             }
         }
         
         private MissileWarning _currentMws;
-        
-        // Definition moved to bottom to be near handlers
-
-
-        private void SwitchAircraft(Aircraft next)
-        {
-            if (_ac == null) _ac = null;
-            if (next == null) next = null;
-
-            if (_ac == next) return;
-
-            try { _unsubscribeAcEvents?.Invoke(); }
-            catch (Exception e) { Log.LogWarning($"Unsubscribe threw: {e}"); }
-            finally { _unsubscribeAcEvents = null; }
-            
-            UnsubscribeMws();
-
-            _ac = next;
-
-            if (_ac != null)
-            {
-                try
-                {
-                    _unsubscribeAcEvents = SubscribeAircraftEvents(_ac);
-                    Log.LogDebug($"Subscribed to aircraft {_ac.unitName}");
-                }
-                catch (Exception e)
-                {
-                    Log.LogError($"Subscribe failed: {e}");
-                    _ac = null;
-                    _unsubscribeAcEvents = null;
-                }
-            }
-        }
         [HarmonyPatch(typeof(Player), nameof(Player.SetAircraft))]
         static class Patch_SetAircraft
         {
@@ -267,6 +233,8 @@ namespace WSOYappinator
                 Log.LogWarning($"{nameof(SubscribeAircraftEvents)}: aircraft is null");
                 return () => { };
             }
+
+            ReloadCurrentVoicepack(true);
 
             _sortieGate.Clear();
 
@@ -388,8 +356,8 @@ namespace WSOYappinator
 
             if (cf != null) cf.OnSetAutoHover += OnAutoHoverChanged;
 
-            // RWR Logic is now handled in Update() to ensure we catch components that initialize late
             _currentMws = null;
+            instance.StartCoroutine(instance.MwsDiscoveryRoutine(aircraft));
 
             void OnRadarWarning(Aircraft.OnRadarWarning e)
             {
@@ -453,6 +421,45 @@ namespace WSOYappinator
         {
             _setManager.Initialize(_audioRoot, SelectedSet.Value);
             eventPriorities = _setManager.EventPriorities;
+        }
+
+        private void ReloadCurrentVoicepack(bool isSpawning = false)
+        {
+            string[] availableSets = Directory.GetDirectories(_audioRoot).Select(Path.GetFileName).Where(n => !string.IsNullOrWhiteSpace(n)).ToArray();
+            if (availableSets.Length == 0) return;
+
+            string selectedPack = SelectedSet.Value;
+
+            if (_ac != null)
+            {
+                if (_ac.definition != null)
+                {
+                    BindAircraftVoicepackConfig(_ac.definition); // Ensure config is bound if it wasn't discovered during scene load
+                }
+
+                if (RandomVoicepackOnSpawn.Value && isSpawning)
+                {
+                    selectedPack = availableSets[_rnd.Next(availableSets.Length)];
+                    Log.LogInfo($"RandomVoicepackOnSpawn is enabled. Picked random set: {selectedPack}");
+                }
+                else
+                {
+                    string keyToLookup = (_ac.definition != null && !string.IsNullOrEmpty(_ac.definition.name)) ? _ac.definition.name : _ac.gameObject.name.Replace("(Clone)", "");
+                    if (_aircraftVoicepacks.TryGetValue(keyToLookup, out var linkedPack))
+                    {
+                        string pack = linkedPack.Value;
+                        if (pack != "Global Default" && !string.IsNullOrWhiteSpace(pack) && availableSets.Contains(pack))
+                        {
+                            selectedPack = pack;
+                            Log.LogInfo($"Aircraft linked voicepack used for {keyToLookup}: {selectedPack}");
+                        }
+                    }
+                }
+            }
+
+            _setManager.Initialize(_audioRoot, selectedPack);
+            eventPriorities = _setManager.EventPriorities;
+            Log.LogInfo($"Loaded voicepack: {selectedPack}");
         }
 
         int GetPriority(VoiceEvent e) => eventPriorities.TryGetValue(e, out int p) ? p : 0;
@@ -633,32 +640,49 @@ namespace WSOYappinator
             return VoiceEvent.RwrOff;
         }
 
+        private void BindAircraftVoicepackConfig(AircraftDefinition def)
+        {
+            if (def == null || string.IsNullOrEmpty(def.name) || def.unitPrefab == null) return;
+            string acKey = def.name;
+            if (_aircraftToggles.ContainsKey(acKey)) return;
+
+            bool isControllable = def.unitPrefab.GetComponentInChildren<ControlsFilter>(true) != null;
+            if (isControllable)
+            {
+                string friendlyName = def.unitName;
+                if (string.IsNullOrEmpty(friendlyName)) friendlyName = acKey;
+
+                var attr = new ConfigurationManagerAttributes { Category = "Aircraft", Order = 0, HideDefaultButton = true, DispName = $"{friendlyName} - Enable Yappinator" };
+                _aircraftToggles[acKey] = Config.Bind("Aircraft", $"{acKey}_Enable", true,
+                    new ConfigDescription($"Enable mod for {friendlyName} ({acKey})", null, attr));
+
+                Aircraft acPrefab = def.unitPrefab.GetComponent<Aircraft>();
+                int crewCount = GetCrewCapacity(acPrefab);
+                string crewSuffix = crewCount > 1 ? "multiseater" : "singleseater";
+                string dispName = $"{friendlyName} {crewSuffix}";
+
+                var sets = Directory.GetDirectories(_audioRoot).Select(Path.GetFileName).Where(n => !string.IsNullOrWhiteSpace(n)).ToList();
+                sets.Insert(0, "Global Default");
+                string firstSet = "Global Default";
+
+                var voiceAttr = new ConfigurationManagerAttributes { Category = "Aircraft", Order = 0, HideDefaultButton = true, DispName = $"{friendlyName} - Voicepack" };
+                var entry = Config.Bind("Aircraft", $"{acKey}_Voicepack", firstSet,
+                    new ConfigDescription($"Selected voicepack for {dispName} ({acKey})", new AcceptableValueList<string>(sets.ToArray()), voiceAttr));
+                entry.SettingChanged += (_, __) => ReloadCurrentVoicepack();
+                _aircraftVoicepacks[acKey] = entry;
+
+                if (VerboseLogs.Value) Log.LogInfo($"Discovered controllable aircraft dynamically: {acKey} ({friendlyName})");
+            }
+        }
+
         private void DiscoverAircraftAndBindConfig()
         {
-            // Use Resources.FindObjectsOfTypeAll to find all Aircraft assets and instances.
-            // This is more robust than relying on a specific singleton if we're not sure of its name.
-            Aircraft[] allAircraft = Resources.FindObjectsOfTypeAll<Aircraft>();
+            AircraftDefinition[] allAircraft = Resources.FindObjectsOfTypeAll<AircraftDefinition>();
             if (allAircraft == null) return;
 
-            foreach (Aircraft ac in allAircraft)
+            foreach (AircraftDefinition def in allAircraft)
             {
-                if (ac != null && !string.IsNullOrEmpty(ac.unitName))
-                {
-                    if (_aircraftToggles.ContainsKey(ac.unitName)) continue;
-
-                    // ControlsFilter is a known type in this project (see SubscribeAircraftEvents).
-                    // Most controllable aircraft have one.
-                    bool isControllable = ac.GetComponentInChildren<ControlsFilter>() != null;
-
-                    if (isControllable)
-                    {
-                        var attr = new ConfigurationManagerAttributes { Category = "Aircraft Toggles", Order = 0, HideDefaultButton = true };
-                        _aircraftToggles[ac.unitName] = Config.Bind("Aircraft Toggles", ac.unitName, true,
-                            new ConfigDescription($"Enable mod for {ac.unitName}", null, attr));
-
-                        if (VerboseLogs.Value) Log.LogInfo($"Discovered controllable aircraft: {ac.unitName}");
-                    }
-                }
+                BindAircraftVoicepackConfig(def);
             }
         }
 
