@@ -251,7 +251,7 @@ namespace WSOYappinator
                 TriggerVoiceline(VoiceEvent.onSortieSuccess);
             }
 
-            void OnRearmHandler(RearmEventArgs _)
+            void OnRearmHandler()
             {
                 TriggerVoiceline(VoiceEvent.Rearm);
             }
@@ -354,8 +354,6 @@ namespace WSOYappinator
 
             if (cf != null) cf.OnSetAutoHover += OnAutoHoverChanged;
 
-            if (cf != null) cf.OnSetAutoHover += OnAutoHoverChanged;
-
             _currentMws = null;
             instance.StartCoroutine(instance.MwsDiscoveryRoutine(aircraft));
 
@@ -379,7 +377,7 @@ namespace WSOYappinator
             aircraft.onSetGear += OnSetGear;
             aircraft.onSetFlightAssist += OnSetFlightAssist;
 
-            aircraft.OnRearm += OnRearmHandler;
+            aircraft.OnRearmUnit += OnRearmHandler;
 
             TriggerVoiceline(VoiceEvent.Spawn);
 
@@ -399,7 +397,7 @@ namespace WSOYappinator
                 aircraft.onSetGear -= OnSetGear;
                 aircraft.onSetFlightAssist -= OnSetFlightAssist;
 
-                aircraft.OnRearm -= OnRearmHandler;
+                aircraft.OnRearmUnit -= OnRearmHandler;
 
                 foreach (KeyValuePair<UnitPart, Action> kv in partUnsub)
                 {
@@ -640,6 +638,54 @@ namespace WSOYappinator
             return VoiceEvent.RwrOff;
         }
 
+        public class AircraftIdentity
+        {
+            public string GoName;
+            public string UnitName;
+            public string[] Aliases;
+        }
+
+        public static readonly AircraftIdentity[] AircraftCatalog =
+        {
+            new AircraftIdentity { GoName = "AttackHelo1",   UnitName = "SAH-46 Chicane",  Aliases = new[] { "AttackHelo1", "SAH-46 Chicane", "SAH-46L" } },
+            new AircraftIdentity { GoName = "SmallFighter1", UnitName = "FS-20 Vortex",    Aliases = new[] { "SmallFighter1", "FS-20 Vortex", "FS-20B" } },
+            new AircraftIdentity { GoName = "FastBomber1",   UnitName = "Alkyon AB-4",     Aliases = new[] { "FastBomber1", "Alkyon AB-4", "AB-4 Alkyon", "AB-4M" } },
+            new AircraftIdentity { GoName = "UFO",           UnitName = "???",              Aliases = new[] { "UFO", "UF-0" } },
+            new AircraftIdentity { GoName = "COIN",          UnitName = "CI-22 Cricket",    Aliases = new[] { "CI-22", "COIN" } },
+            new AircraftIdentity { GoName = "EW1",           UnitName = "EW-25 Medusa",    Aliases = new[] { "EW1", "EW-25 Medusa", "EA-25 Medusa", "EA-25B" } },
+            new AircraftIdentity { GoName = "QuadVTOL1",     UnitName = "VL-49 Tarantula", Aliases = new[] { "QuadVTOL1", "VL-49 Tarantula", "VL-49D" } },
+            new AircraftIdentity { GoName = "Darkreach",     UnitName = "SFB-81 Darkreach", Aliases = new[] { "SFB", "SFB-81" } },
+            new AircraftIdentity { GoName = "Trainer",       UnitName = "T/A-30 Compass",   Aliases = new[] { "TA-30 Compass", "T/A-30 Compass", "TA-30YH" } },
+            new AircraftIdentity { GoName = "UtilityHelo1",  UnitName = "UH-90 Ibis",      Aliases = new[] { "UH-90 Ibis", "UH-90K" } },
+            new AircraftIdentity { GoName = "CAS1",          UnitName = "A-19 Brawler",    Aliases = new[] { "A-19 Brawler", "A-19C" } },
+            new AircraftIdentity { GoName = "FS-12",         UnitName = "FS-12 Revoker",   Aliases = new[] { "FS-12 Revoker", "FS-12V", "Fighter1" } },
+            new AircraftIdentity { GoName = "Multirole1",    UnitName = "KR-67 Ifrit",     Aliases = new[] { "KR-67 Ifrit", "KR-67A" } },
+
+            new AircraftIdentity { GoName = "Aryx_F16M_KingViper",   UnitName = "F-16M King Viper", Aliases = new[] { "Aryx_F16M_KingViper_AircraftDefinition" } },
+            new AircraftIdentity { GoName = "Aryx_LightHelicopter1", UnitName = "RAH-72 Knockout",  Aliases = new[] { "Aryx_LightHelicopter1_Definition" } },
+            new AircraftIdentity { GoName = "Aryx_LightFighter1",    UnitName = "F-99 Shrike",      Aliases = new[] { "Aryx_LightFighter1_Definition" } },
+            new AircraftIdentity { GoName = "Aryx_MiG-15",           UnitName = "MiG-15",           Aliases = new[] { "Aryx_MiG-15_AircraftDefinition" } },
+            new AircraftIdentity { GoName = "P_Trisurface1",         UnitName = "FS-3 Ternion",    Aliases = new[] { "P_Trisurface1_definition", "FS-3 Ternion", "FS-3E" } },
+            new AircraftIdentity { GoName = "Aryx_MC260_Chimera",    UnitName = "MC-260 Chimera",   Aliases = new[] { "Aryx_MC260_Chimera_Definition" } },
+            new AircraftIdentity { GoName = "Kestrel",               UnitName = "FQ-106 Kestrel",   Aliases = new[] { "kestrel_definition" } },
+            new AircraftIdentity { GoName = "VTOLTrainer1",          UnitName = "VT-7 Vagrant",     Aliases = new[] { "VTOLTrainer1", "VT-7 Vagrant", "VT-7" } },
+        };
+
+        public static string GetFriendlyAircraftName(string key)
+        {
+            if (string.IsNullOrEmpty(key)) return null;
+            foreach (var ident in AircraftCatalog)
+            {
+                if (string.Equals(ident.GoName, key, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(ident.UnitName, key, StringComparison.OrdinalIgnoreCase) ||
+                    (ident.Aliases != null && ident.Aliases.Any(a => string.Equals(a, key, StringComparison.OrdinalIgnoreCase))))
+                {
+                    return ident.UnitName;
+                }
+            }
+            return null;
+        }
+
         private void BindAircraftVoicepackConfig(AircraftDefinition def)
         {
             if (def == null || string.IsNullOrEmpty(def.name) || def.unitPrefab == null) return;
@@ -649,7 +695,7 @@ namespace WSOYappinator
             bool isControllable = def.unitPrefab.GetComponentInChildren<ControlsFilter>(true) != null;
             if (isControllable)
             {
-                string friendlyName = def.unitName;
+                string friendlyName = GetFriendlyAircraftName(acKey) ?? def.unitName;
                 if (string.IsNullOrEmpty(friendlyName)) friendlyName = acKey;
 
                 var attr = new ConfigurationManagerAttributes { Category = "Aircraft", Order = 0, HideDefaultButton = true, DispName = $"{friendlyName} - Enable Yappinator" };
